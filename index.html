@@ -115,19 +115,198 @@
 
         <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full">
 
-            <!-- TAB 1: Portal & Hub -->
-            <div id="tab-hub" class="space-y-6 hidden">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-                    <h2 class="text-xs font-bold tracking-wider uppercase text-slate-400 mb-4">Teacher Learning Portals</h2>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                        <a href="https://udiseplus.gov.in" target="_blank" class="p-4 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-indigo-50/50 hover:border-indigo-200 transition block group"><span class="text-slate-800 group-hover:text-indigo-600 font-semibold text-xs block transition">UDISE+ Portal</span></a>
-                        <a href="https://www.education.maharashtra.gov.in/" target="_blank" class="p-4 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-indigo-50/50 hover:border-indigo-200 transition block group"><span class="text-slate-800 group-hover:text-indigo-600 font-semibold text-xs block transition">Saral Portal</span></a>
-                        <a href="https://shalarth.maharashtra.gov.in" target="_blank" class="p-4 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-indigo-50/50 hover:border-indigo-200 transition block group"><span class="text-slate-800 group-hover:text-indigo-600 font-semibold text-xs block transition">Shalarth</span></a>
-                        <a href="https://diksha.gov.in" target="_blank" class="p-4 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-indigo-50/50 hover:border-indigo-200 transition block group"><span class="text-slate-800 group-hover:text-indigo-600 font-semibold text-xs block transition">Diksha App</span></a>
+           <!-- TAB 1: Hub & Daily Records -->
+<div id="tab-hub" class="space-y-6">
+    
+    <!-- External Portal Redirects Section -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+        <h2 class="text-xs font-bold tracking-wider uppercase text-slate-400">Teacher Learning & Administrative Portals</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="https://udiseplus.gov.in" target="_blank" class="p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-sm transition flex items-center justify-between group">
+                <div>
+                    <span class="text-sm font-semibold text-slate-800 group-hover:text-indigo-600 block">UDISE+ Portal</span>
+                    <span class="text-[10px] text-slate-400">Student & school data</span>
+                </div>
+                <span class="text-slate-400 group-hover:text-indigo-600">&rarr;</span>
+            </a>
+            <a href="https://saral.maharashtra.gov.in" target="_blank" class="p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-sm transition flex items-center justify-between group">
+                <div>
+                    <span class="text-sm font-semibold text-slate-800 group-hover:text-indigo-600 block">Saral Portal</span>
+                    <span class="text-[10px] text-slate-400">State database</span>
+                </div>
+                <span class="text-slate-400 group-hover:text-indigo-600">&rarr;</span>
+            </a>
+            <a href="https://shalarth.maharashtra.gov.in" target="_blank" class="p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-sm transition flex items-center justify-between group">
+                <div>
+                    <span class="text-sm font-semibold text-slate-800 group-hover:text-indigo-600 block">Shalarth</span>
+                    <span class="text-[10px] text-slate-400">Payroll & personnel</span>
+                </div>
+                <span class="text-slate-400 group-hover:text-indigo-600">&rarr;</span>
+            </a>
+            <a href="https://diksha.gov.in" target="_blank" class="p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-sm transition flex items-center justify-between group">
+                <div>
+                    <span class="text-sm font-semibold text-slate-800 group-hover:text-indigo-600 block">Diksha App</span>
+                    <span class="text-[10px] text-slate-400">Learning resources</span>
+                </div>
+                <span class="text-slate-400 group-hover:text-indigo-600">&rarr;</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Actions & Dashboard Header -->
+    <div class="bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 p-6 rounded-2xl shadow-md text-white flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="space-y-1 text-center md:text-left">
+            <span class="bg-white/20 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">Active Portal Dashboard</span>
+            <h2 class="text-lg font-bold">Welcome back, <span id="activeProfileNameDisp">Teacher</span>!</h2>
+            <p class="text-xs text-indigo-100">Manage your daily student records, track mid-day meal consumption metrics, and monitor inventory seamlessly.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="openProfileModal()" class="bg-white/10 hover:bg-white/20 text-white font-medium px-4 py-2 text-xs rounded-xl border border-white/20 transition backdrop-blur-xs">Switch Profile</button>
+            <button onclick="openPrintReport()" class="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold px-4 py-2 text-xs rounded-xl shadow-xs transition">Print Monthly Report</button>
+        </div>
+    </div>
+
+    <!-- Quick Stats Overview Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Logged Days</span>
+            <span id="statRecordCount" class="text-lg font-bold text-slate-800 block">0 Days</span>
+            <span class="text-[10px] text-emerald-600 font-medium flex items-center gap-1">&uarr; Active current month</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Beneficiaries</span>
+            <span id="statTotalStudents" class="text-lg font-bold text-indigo-600 block">0 Total</span>
+            <span class="text-[10px] text-slate-400">Cumulative student count</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Quick Navigation</span>
+            <div class="pt-1 flex gap-2">
+                <button onclick="switchTab('excel')" class="text-xs font-semibold text-indigo-600 hover:underline">Excel Sync &rarr;</button>
+                <span class="text-slate-300">|</span>
+                <button onclick="switchTab('tools')" class="text-xs font-semibold text-slate-600 hover:underline">Utilities &rarr;</button>
+            </div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">System Backup</span>
+            <div class="pt-1 flex gap-2">
+                <button onclick="exportSystemBackup()" class="text-xs font-semibold text-indigo-600 hover:underline">Export JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Data Entry & Stock Balance Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left 2 Cols: Daily Entry Card -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h2 class="text-xs font-bold tracking-wider uppercase text-slate-400">Add Daily Record Entry</h2>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-500 font-medium">Quick Attendance Fill:</span>
+                    <input type="number" id="syncTotalPat" value="22" class="w-12 bg-slate-50 border border-slate-200 rounded text-center text-xs p-1">
+                    <select id="syncAttendancePct" onchange="applyAttendanceSync()" class="bg-slate-50 border border-slate-200 rounded text-xs p-1 text-slate-600">
+                        <option value="100">100%</option>
+                        <option value="90">90%</option>
+                        <option value="80" selected>80%</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Date</label>
+                    <input type="date" id="inputDate" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Day</label>
+                    <select id="inputDay" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800">
+                        <option>MONDAY</option><option>TUESDAY</option><option>WEDNESDAY</option><option>THURSDAY</option><option>FRIDAY</option><option>SATURDAY</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Total Enrolled (PAT)</label>
+                    <input type="number" id="inputPat" value="22" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Beneficiaries Present</label>
+                    <input type="number" id="inputBeneficiaries" value="18" oninput="previewConsumption()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800">
+                </div>
+            </div>
+
+            <!-- Menu & Material Consumption Grid -->
+            <div class="space-y-3 pt-2">
+                <div class="flex justify-between items-center">
+                    <label class="block text-xs font-medium text-slate-600">Select Menu Preset</label>
+                    <div class="flex gap-2">
+                        <select id="presetMenuSelector" onchange="loadMenuPreset()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800">
+                            <option value="MONDAY">Veg Pulao</option>
+                            <option value="TUESDAY">Moong Dal Khichdi</option>
+                        </select>
+                        <button onclick="openAddMenuModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition">+ Menu</button>
+                    </div>
+                </div>
+
+                <div id="materialInputsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1">
+                    <!-- Dynamic Material Inputs Loaded Here -->
+                </div>
+
+                <!-- Live Calculated Consumption Preview Badge Bar -->
+                <div class="bg-slate-50 border border-slate-200/60 p-3 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <span class="text-slate-500 font-medium">Estimated Daily Consumption Preview:</span>
+                    <div id="livePreviewContainer" class="flex flex-wrap gap-2 text-slate-700">
+                        <!-- Dynamic Badges -->
                     </div>
                 </div>
             </div>
 
+            <div class="pt-2 flex justify-end">
+                <button onclick="addDailyEntry()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 text-xs rounded-xl shadow-xs transition">Add Entry to Ledger</button>
+            </div>
+        </div>
+
+        <!-- Right Col: Stock Balance & Ledger Status Card -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4 flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <h2 class="text-xs font-bold tracking-wider uppercase text-slate-400">Stock & Ledger Balances</h2>
+                    <button onclick="calculateLedgerSummary()" class="text-xs text-indigo-600 font-semibold hover:underline">Recalculate</button>
+                </div>
+                <p class="text-xs text-slate-500">Set opening inventories to track live remaining rations dynamically based on daily entries.</p>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-500 mb-1">Rice Opening (Kg)</label>
+                        <input type="number" id="stockRice" value="50" oninput="calculateLedgerSummary()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-500 mb-1">Dal Opening (Kg)</label>
+                        <input type="number" id="stockDal" value="15" oninput="calculateLedgerSummary()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-500 mb-1">Oil Opening (Kg)</label>
+                        <input type="number" id="stockOil" value="10" oninput="calculateLedgerSummary()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-500 mb-1">Salt Opening (Kg)</label>
+                        <input type="number" id="stockSalt" value="5" oninput="calculateLedgerSummary()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs">
+                    </div>
+                </div>
+
+                <!-- Summary Calculation Output Grid -->
+                <div id="ledgerSummaryGrid" class="grid grid-cols-2 gap-2 pt-2">
+                    <!-- Dynamic Balances Rendered Here -->
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex gap-2">
+                <button onclick="downloadFilledExcel()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 text-xs rounded-xl transition text-center shadow-xs">Export Excel</button>
+                <button onclick="clearAllRecords()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-2.5 text-xs rounded-xl font-medium transition">Clear</button>
+            </div>
+        </div>
+
+    </div>
+</div>
             <!-- TAB 2: PM Poshan Excel & Menu Wizard -->
             <div id="tab-excel" class="space-y-6">
                 
