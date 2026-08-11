@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Desk - PM Poshan Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS Library for Excel Processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @media print {
+            body * { visibility: hidden; }
+            #printReportModal, #printReportModal * { visibility: visible; }
+            #printReportModal { position: absolute; left: 0; top: 0; width: 100%; background: white !important; }
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-50 text-slate-900 antialiased selection:bg-indigo-500 selection:text-white flex flex-col justify-between">
+
+    <!-- INITIAL LOGIN & PROFILE SELECTOR GATE -->
+    <div id="loginPage" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-100 space-y-6">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mx-auto text-xl font-semibold">📁</div>
+                <h2 class="text-xl font-bold tracking-tight text-slate-900">Smart Desk Portal</h2>
+                <p id="gateSubtitle" class="text-xs font-medium text-slate-500">Configure your profile or select a player</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Select Existing User Section -->
+                <div id="existingUserSection" class="hidden space-y-1.5">
+                    <label class="block text-xs font-semibold text-slate-700">Select Profile</label>
+                    <div class="flex gap-2">
+                        <select id="loginProfileSelector" class="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition"></select>
+                        <button onclick="openLoginProfileModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-lg text-xs font-semibold transition">New</button>
+                    </div>
+                </div>
+
+                <!-- Set Up Profile Section -->
+                <div id="setupProfileSection" class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 block">New Profile Setup</span>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Player ID / Name</label>
+                        <input type="text" id="setupProfId" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="Player One">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">School Name (शाळेचे नाव)</label>
+                        <input type="text" id="setupSchoolName" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="Z.P. School">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Taluka</label>
+                            <input type="text" id="setupTaluka" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="Taluka">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">District</label>
+                            <input type="text" id="setupDistrict" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="District">
+                        </div>
+                    </div>
+                    <button onclick="saveAndLaunchSetup()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg text-xs shadow-sm transition">Save & Start System</button>
+                </div>
+
+                <!-- Active Profile Info preview card -->
+                <div id="loginSchoolPreview" class="bg-slate-50 p-3.5 rounded-xl border border-slate-200/60 space-y-1 text-xs hidden">
+                    <span class="font-semibold uppercase tracking-wider text-slate-400 block text-[10px]">Config Data</span>
+                    <div id="previewSchoolName" class="font-semibold text-slate-800 text-sm">No School Set</div>
+                    <div id="previewLocation" class="text-slate-500">Taluka: - | Dist: -</div>
+                </div>
+            </div>
+
+            <button id="launchExistingBtn" onclick="enterMainDesk()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl text-sm shadow-sm transition hidden">Launch Portal →</button>
+        </div>
+    </div>
+
+    <!-- MAIN DESK CONTAINER -->
+    <div id="mainDeskContainer" class="hidden flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-6 h-16 flex flex-col sm:flex-row justify-between items-center gap-3">
+                <h1 class="text-sm font-bold tracking-tight flex items-center gap-2 text-slate-900">
+                    <span class="w-8 h-8 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-sm font-semibold">📁</span> 
+                    Smart Desk <span class="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Minimal Mode</span>
+                </h1>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
+                        <span class="text-xs font-medium text-slate-500">User:</span>
+                        <select id="userProfileSelector" onchange="switchUserProfile()" class="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"></select>
+                        <button onclick="openProfileModal()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 w-5 h-5 rounded flex items-center justify-center font-bold ml-1 transition">+</button>
+                    </div>
+                    <button onclick="logoutToGate()" class="text-xs font-medium bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-lg transition">Exit</button>
+                    <span id="schoolBadge" class="hidden md:inline-block text-xs font-medium bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg truncate max-w-xs">No School Loaded</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="bg-white border-b border-slate-200 shadow-xs">
+            <div class="max-w-7xl mx-auto px-6 flex gap-8">
+                <button onclick="switchTab('hub')" id="btn-hub" class="py-3 font-semibold text-xs text-slate-400 border-b-2 border-transparent hover:text-slate-700 transition">01. Portal Hub</button>
+                <button onclick="switchTab('excel')" id="btn-excel" class="py-3 font-semibold text-xs text-indigo-600 border-b-2 border-indigo-600 transition">02. Ledger & Menu</button>
+                <button onclick="switchTab('tools')" id="btn-tools" class="py-3 font-semibold text-xs text-slate-400 border-b-2 border-transparent hover:text-slate-700 transition">03. Utilities</button>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full">
+
+            <!-- TAB 1: Portal & Hub -->
+            <div id="tab-hub" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+                    <h2 class="text-xs font-bold tracking-wider uppercase text-slate-400 mb-4">Teacher Learning Portals</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                        <a href="https://udiseplus.gov.in" target="_blank" class="p-4 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-indigo-50/50 hover:border-indigo-200 transition block group"><span class="text-slate-800 group-hover:text-indigo-600 font-semibold text-xs block transition">UDISE+ Portal</span></a>
+                        <a href="https://www.education.maharashtra.gov.in/" target="_blank" class="p-4 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-indigo-50/50 hover:border-indigo-200 transition block group"><span class="text-slate-800 group-hover:text-indigo-600 font-semibold text-xs block transition">Saral Portal</span></a>
+                        <a href="https://shalarth.maharashtra.gov.in" target="_blank" class="p-4 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-indigo-50/50 hover:border-indigo-200 transition block group"><span class="text-slate-800 group-hover:text-indigo-600 font-semibold text-xs block transition">Shalarth</span></a>
+                        <a href="https://diksha.gov.in" target="_blank" class="p-4 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-indigo-50/50 hover:border-indigo-200 transition block group"><span class="text-slate-800 group-hover:text-indigo-600 font-semibold text-xs block transition">Diksha App</span></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: PM Poshan Excel & Menu Wizard -->
+            <div id="tab-excel" class="space-y-6">
+                
+                <!-- Step 1: Upload Box & Quick Creator -->
+                <section id="uploadStep" class="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-xs text-center space-y-6 max-w-2xl mx-auto my-12">
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mx-auto text-xl font-semibold">📊</div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">PM Poshan Monthly Register</h2>
+                        <p class="text-xs text-slate-500 mt-1">Select month and upload/generate register for <span id="activeProfileNameDisp" class="text-slate-800 font-semibold">User</span>.</p>
+                    </div>
+
+                    <!-- Month Selection Bar -->
+                    <div class="max-w-xs mx-auto space-y-1 text-left bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                        <label class="block text-xs font-semibold text-slate-700">Select Month & Year</label>
+                        <input type="month" id="globalMonthSelector" onchange="onMonthChanged()" class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition cursor-pointer">
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4 pt-2">
+                        <!-- File Upload Input -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 text-left">
+                            <label class="block text-xs font-semibold text-slate-700 mb-2">Upload .XLSX File</label>
+                            <input type="file" id="excelFile" accept=".xlsx, .xls" onchange="handleExcelUpload(event)" class="block text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:bg-slate-200 file:text-slate-700 file:font-semibold file:rounded-lg file:border-0 hover:file:bg-slate-300 cursor-pointer transition">
+                        </div>
+
+                        <div class="text-slate-400 text-xs font-medium uppercase">Or</div>
+
+                        <!-- Generate Blank Sheet Button -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 text-left space-y-2">
+                            <label class="block text-xs font-semibold text-slate-700 mb-2">Start Fresh</label>
+                            <button onclick="generateFreshOfficialSheet()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-5 text-xs rounded-lg transition flex items-center justify-center gap-2 shadow-sm">
+                                <span>Generate Sheet</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Step 2: Interactive Workspace -->
+                <div id="formStep" class="hidden space-y-6">
+                    
+                    <!-- Status & Stats Bar -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+                            <div>
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Month</span>
+                                <span id="activeMonthDisplay" class="text-sm font-bold text-slate-800 block">Jun-2026</span>
+                                <span id="fileNameDisplay" class="text-xs text-slate-500 truncate max-w-[160px] block">file.xlsx</span>
+                            </div>
+                            <button onclick="resetWizard()" class="text-xs text-rose-500 font-semibold hover:underline">Reset</button>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Days Logged</span>
+                            <span id="statRecordCount" class="text-lg font-bold text-slate-900">0 Days</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Students Served</span>
+                            <span id="statTotalStudents" class="text-lg font-bold text-indigo-600">0 Total</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-2">
+                            <button onclick="downloadFilledExcel()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 px-3 text-xs rounded-xl transition flex items-center justify-center shadow-sm">
+                                <span>Excel</span>
+                            </button>
+                            <button onclick="openPrintReport()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 px-3 text-xs rounded-xl transition flex items-center justify-center">
+                                <span>Report</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Opening Balance Card -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Last Month's Remaining Stock (शिल्लक)</h3>
+                                <p class="text-xs text-slate-500">Zero-balance minimal default active.</p>
+                            </div>
+                            <button onclick="applyOpeningBalances()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 text-xs rounded-lg transition">Apply</button>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Rice (तांदूळ Kg)</label>
+                                <input type="number" step="0.1" id="stockRice" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Dal (तुरडाळ Kg)</label>
+                                <input type="number" step="0.1" id="stockDal" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Oil (सोय तेल Kg)</label>
+                                <input type="number" step="0.001" id="stockOil" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Salt (मीठ Kg)</label>
+                                <input type="number" step="0.001" id="stockSalt" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Stock Ledger Summary Box -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Monthly Ledger & Closing Balance</h3>
+                                <p class="text-xs text-slate-500">Opening Stock minus Consumption.</p>
+                            </div>
+                            <button onclick="calculateLedgerSummary()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 text-xs rounded-lg transition">Recalculate</button>
+                        </div>
+                        <div id="ledgerSummaryGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+                    </div>
+
+                    <!-- Menu & Per-Student Material Requirement Form -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Menu Material Multipliers</h3>
+                                <p class="text-xs text-slate-500">Configure per-student material consumption rates.</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Select Menu</label>
+                                    <select id="presetMenuSelector" onchange="loadMenuPreset()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                                        <option value="MONDAY">1) Veg Pulao</option>
+                                        <option value="TUESDAY">2) Moong Dal Khichdi</option>
+                                    </select>
+                                </div>
+                                <div class="pt-5">
+                                    <button onclick="openAddMenuModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-3 py-2 text-xs rounded-lg transition flex items-center gap-1">
+                                        <span>+ Menu</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Material Multiplier Inputs Grid -->
+                        <div id="materialInputsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2"></div>
+                    </div>
+
+                    <!-- Custom Menu Modal / Inline Creator Box -->
+                    <div id="customMenuBox" class="bg-slate-50 p-6 rounded-2xl border border-slate-200/80 hidden space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Create Custom Menu</h4>
+                            <button onclick="closeAddMenuModal()" class="text-slate-400 hover:text-slate-600 font-semibold text-xs">[Close]</button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Menu Name</label>
+                                <input type="text" id="newMenuNameInput" class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="Amti Bhaat">
+                            </div>
+                            <div class="flex items-end">
+                                <button onclick="saveNewMenu()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 text-xs rounded-lg transition shadow-sm">Save Menu</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Form Card: Daily Entry & Bulk Range Generator -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-6">
+                        <div class="border-b border-slate-100 pb-4 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Daily Entry & Bulk Generator</h3>
+                                <p class="text-xs text-slate-500">Generate records using rates above.</p>
+                            </div>
+                            <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200/60">
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-500">Total Pat (पट)</label>
+                                    <input type="number" id="syncTotalPat" value="22" oninput="applyAttendanceSync()" class="w-16 bg-white border border-slate-200 rounded p-1 text-xs text-slate-800 text-center font-medium">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-500">Attendance</label>
+                                    <select id="syncAttendancePct" onchange="applyAttendanceSync()" class="bg-white border border-slate-200 rounded p-1 text-xs text-slate-800 font-medium">
+                                        <option value="100">100%</option>
+                                        <option value="90">90%</option>
+                                        <option value="80">80%</option>
+                                        <option value="75">75%</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Date (दिनांक)</label>
+                                <input type="date" id="inputDate" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Day (वार)</label>
+                                <select id="inputDay" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                                    <option value="MONDAY">Monday</option>
+                                    <option value="TUESDAY">Tuesday</option>
+                                    <option value="WEDNESDAY">Wednesday</option>
+                                    <option value="THURSDAY">Thursday</option>
+                                    <option value="FRIDAY">Friday</option>
+                                    <option value="SATURDAY">Saturday</option>
+                                    <option value="SUNDAY">Sunday</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Enrolled (पट)</label>
+                                <input type="number" id="inputPat" value="22" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Beneficiaries</label>
+                                <input type="number" id="inputBeneficiaries" value="16" oninput="previewConsumption()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                            </div>
+                        </div>
+
+                        <!-- Bulk Range Controls -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Bulk Start</label>
+                                <input type="date" id="bulkStartDate" class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Bulk End</label>
+                                <input type="date" id="bulkEndDate" class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                            </div>
+                            <div>
+                                <button onclick="toggleExceptionBox()" class="w-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-medium py-2.5 px-3 text-xs rounded-lg transition shadow-xs">
+                                    Exclude Holidays (<span id="exceptionCount">0</span>)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Exception Calendar Section -->
+                        <div id="exceptionSection" class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 hidden space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-semibold text-slate-700">Holiday Exclusion List:</span>
+                                <button onclick="clearExceptions()" class="text-xs text-rose-500 font-semibold hover:underline">Clear</button>
+                            </div>
+                            <div class="flex gap-3 items-center">
+                                <input type="date" id="exceptionDateInput" class="bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                                <button onclick="addExceptionDate()" class="bg-slate-800 hover:bg-slate-900 text-white font-medium px-4 py-2 text-xs rounded-lg transition">+ Exclude</button>
+                            </div>
+                            <div id="exceptionList" class="flex flex-wrap gap-2 pt-1"></div>
+                        </div>
+
+                        <!-- Live Preview Box -->
+                        <div class="bg-slate-50 border border-slate-200/60 p-4 rounded-xl space-y-2">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Consumption Preview (1 Student Rates × Beneficiaries)</span>
+                            <div id="livePreviewContainer" class="flex flex-wrap gap-3 text-xs text-slate-700 font-medium"></div>
+                        </div>
+
+                        <div class="pt-2 flex gap-4">
+                            <button onclick="addDailyEntry()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 text-xs rounded-xl transition shadow-sm">Add / Generate Entry →</button>
+                            <button onclick="clearForm()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium px-5 py-3 text-xs rounded-xl transition">Reset</button>
+                        </div>
+                    </div>
+
+                    <!-- Table Preview -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Recorded Monthly Log Preview</h3>
+                            <button onclick="clearAllRecords()" class="text-xs text-rose-500 font-semibold hover:underline">Clear All</button>
+                        </div>
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl max-h-80 bg-white">
+                            <table id="previewTable" class="w-full text-left text-xs font-medium">
+                                <thead id="tableHeader" class="bg-slate-50 text-slate-700 border-b border-slate-200 sticky top-0 font-bold uppercase tracking-wider"></thead>
+                                <tbody id="tableBody" class="divide-y divide-slate-100 text-slate-600"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- TAB 3: Utilities -->
+            <div id="tab-tools" class="space-y-6 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+                        <h2 class="text-xs font-bold tracking-wider uppercase text-slate-400">Student Age Calculator</h2>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Date of Birth</label>
+                            <input type="date" id="dob" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Cutoff Date</label>
+                            <input type="date" id="cutoffDate" value="2026-03-31" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                        </div>
+                        <button onclick="calculateAge()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 text-xs rounded-lg transition shadow-sm">Calculate Age</button>
+                        <div id="ageResult" class="text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-200/60 p-3 rounded-lg hidden"></div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4 flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-xs font-bold tracking-wider uppercase text-slate-400 mb-3">Quick-Copy Remarks</h2>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center bg-slate-50 border border-slate-200/60 p-3 rounded-xl text-xs">
+                                    <span class="text-slate-700 truncate max-w-[240px]" id="remark1">Active in class activities and very disciplined.</span>
+                                    <button onclick="copyText('remark1')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 font-medium rounded-lg transition">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="copyAlert" class="text-xs text-indigo-600 font-semibold text-center hidden">Copied to clipboard!</div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        
+        <!-- Footer -->
+        <footer class="bg-white border-t border-slate-200 py-4 mt-auto text-center text-xs text-slate-400">
+            Smart Desk Minimal Portal &bull; Secure Local Ledger Engine
+        </footer>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-100 space-y-6">
+            <div class="border-b border-slate-100 pb-3">
+                <h3 class="text-lg font-bold text-slate-900">Add School Profile</h3>
+                <p class="text-xs text-slate-500">Configure profile school details.</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Player / Profile ID</label>
+                    <input type="text" id="modalProfId" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" value="TEACHER_1">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">School Name (शाळेचे नाव)</label>
+                    <input type="text" id="modalSchoolName" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="Z.P. School">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Taluka</label>
+                        <input type="text" id="modalTaluka" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="Taluka">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">District</label>
+                        <input type="text" id="modalDistrict" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="District">
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="saveNewProfileFromModal()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl text-xs shadow-sm transition">Create</button>
+                <button onclick="closeProfileModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2.5 font-medium rounded-xl text-xs transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Printable Report Modal -->
+    <div id="printReportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white text-slate-900 p-8 rounded-2xl max-w-2xl w-full shadow-2xl space-y-6 border border-slate-100">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div>
+                    <h3 id="reportSchoolName" class="text-base font-bold text-slate-900">शाळेचे नाव</h3>
+                    <p id="reportLocation" class="text-xs text-slate-500 font-medium">तालुका: - | जिल्हा: -</p>
+                </div>
+                <button onclick="closePrintReport()" class="text-slate-400 hover:text-slate-600 font-bold text-sm">✕ Close</button>
+            </div>
+            <div class="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                <div><strong>Selected Month:</strong> <span id="repMonth">Jun-2026</span></div>
+                <div><strong>Total Days:</strong> <span id="repDays">0</span></div>
+                <div class="col-span-2"><strong>Total Students Served:</strong> <span id="repBeneficiaries">0</span></div>
+            </div>
+            <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-500 mb-2">Stock Ledger Summary</h4>
+                <table class="w-full text-xs border border-slate-200 rounded-lg overflow-hidden">
+                    <thead class="bg-slate-50 text-slate-700 border-b border-slate-200">
+                        <tr>
+                            <th class="p-2.5 border-r border-slate-200 text-left">Material</th>
+                            <th class="p-2.5 border-r border-slate-200 text-left">Opening</th>
+                            <th class="p-2.5 border-r border-slate-200 text-left">Consumed</th>
+                            <th class="p-2.5 border-left text-left">Closing</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportLedgerBody" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+            <div class="grid grid-cols-2 pt-6 text-xs text-center text-slate-600">
+                <div>
+                    <div class="h-12"></div>
+                    <p class="border-t border-slate-300 pt-1 font-semibold">Cook / Helper Signature</p>
+                </div>
+                <div>
+                    <div class="h-12"></div>
+                    <p class="border-t border-slate-300 pt-1 font-semibold">Headmaster / Teacher Signature</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-4">
+                <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 text-xs rounded-xl transition shadow-sm">Print / PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Engine -->
+    <script>
+        let currentProfile = "";
+        let selectedRegisterMonth = "2026-06";
+        let schoolDetails = { name: "", taluka: "", district: "" };
+        let globalHeaders = [];
+        let globalRecords = [];
+        let loadedWorkbook = null;
+        let originalFileName = "pm_poshan_filled.xlsx";
+        let rawSheetData = null;
+        let originalRow0Meta = [];
+        let originalRow2Meta = []; 
+        let exceptionDates = [];
+
+        const allMaterials = [
+            "तांदूळ", "तुरडाळ", "अख्खा मूग", "चवळी", "मसूर डाळ", 
+            "मूग डाळ", "हरभरा", "वाटाणा", "मटकी", "सोयाबीन वडी", 
+            "जिरे", "मोहरी", "हळद", "मिरची मसाला", "सोय तेल", "मीठ"
+        ];
+
+        let defaultMenuPresets = {
+            "MONDAY": {
+                name: "1) Veg Pulao",
+                rates: {
+                    "तांदूळ": 0.1, "तुरडाळ": "", "अख्खा मूग": "", "चवळी": "", "मसूर डाळ": "", 
+                    "मूग डाळ": "", "हरभरा": "", "वाटाणा": 0.02, "मटकी": "", "सोयाबीन वडी": "", 
+                    "जिरे": 0.00005, "मोहरी": 0.0001, "हळद": 0, "मिरची मसाला": 0.001, 
+                    "सोय तेल": 0.005, "मीठ": 0.001
+                }
+            },
+            "TUESDAY": {
+                name: "2) Moong Dal Khichdi",
+                rates: {
+                    "तांदूळ": 0.075, "तुरडाळ": "", "अख्खा मूग": "", "चवळी": "", "मसूर डाळ": "", 
+                    "मूग डाळ": 0.025, "हरभरा": "", "वाटाणा": "", "मटकी": "", "सोयाबीन वडी": "", 
+                    "जिरे": 0.00005, "मोहरी": 0.0001, "हळद": 0.0005, "मिरची मसाला": 0.001, 
+                    "सोय तेल": 0.005, "मीठ": 0.001
+                }
+            }
+        };
+
+        let menuPresets = JSON.parse(JSON.stringify(defaultMenuPresets));
+
+        function getSavedProfiles() {
+            let keys = Object.keys(localStorage);
+            return keys.filter(k => k.startsWith("pmposhan_profile_")).map(k => k.replace("pmposhan_profile_", ""));
+        }
+
+        function updateLoginGate() {
+            let profiles = getSavedProfiles();
+            const existingSec = document.getElementById('existingUserSection');
+            const setupSec = document.getElementById('setupProfileSection');
+            const previewCard = document.getElementById('loginSchoolPreview');
+            const launchBtn = document.getElementById('launchExistingBtn');
+            const subtitle = document.getElementById('gateSubtitle');
+
+            if (profiles.length === 0) {
+                existingSec.classList.add('hidden');
+                setupSec.classList.remove('hidden');
+                previewCard.classList.add('hidden');
+                launchBtn.classList.add('hidden');
+                subtitle.textContent = "Setup player profile to start";
+            } else {
+                existingSec.classList.remove('hidden');
+                setupSec.classList.add('hidden');
+                previewCard.classList.remove('hidden');
+                launchBtn.classList.remove('hidden');
+                subtitle.textContent = "Select player profile";
+
+                let optionsHtml = '';
+                profiles.forEach(prof => {
+                    optionsHtml += `<option value="${prof}">${prof}</option>`;
+                });
+                document.getElementById('loginProfileSelector').innerHTML = optionsHtml;
+                if (!currentProfile || !profiles.includes(currentProfile)) {
+                    currentProfile = profiles[0];
+                }
+                document.getElementById('loginProfileSelector').value = currentProfile;
+                updateLoginPreview();
+            }
+
+            let mainSelector = document.getElementById('userProfileSelector');
+            if (mainSelector) {
+                let mainOpts = '';
+                profiles.forEach(p => {
+                    mainOpts += `<option value="${p}">${p}</option>`;
+                });
+                mainSelector.innerHTML = mainOpts;
+                if (currentProfile) mainSelector.value = currentProfile;
+            }
+        }
+
+        function updateLoginPreview() {
+            const selProf = document.getElementById('loginProfileSelector').value;
+            let saved = localStorage.getItem("pmposhan_profile_" + selProf);
+            if (saved) {
+                try {
+                    let state = JSON.parse(saved);
+                    if (state.schoolDetails && state.schoolDetails.name) {
+                        document.getElementById('previewSchoolName').textContent = state.schoolDetails.name;
+                        document.getElementById('previewLocation').textContent = `Taluka: ${state.schoolDetails.taluka || '-'} | Dist: ${state.schoolDetails.district || '-'}`;
+                        return;
+                    }
+                } catch(e){}
+            }
+            document.getElementById('previewSchoolName').textContent = "No School Set";
+            document.getElementById('previewLocation').textContent = "Taluka: - | Dist: -";
+        }
+
+        document.getElementById('loginProfileSelector')?.addEventListener('change', function() {
+            currentProfile = this.value;
+            updateLoginPreview();
+        });
+
+        function saveAndLaunchSetup() {
+            let profId = document.getElementById('setupProfId').value.trim().replace(/\s+/g, '_');
+            let schName = document.getElementById('setupSchoolName').value.trim();
+            let tal = document.getElementById('setupTaluka').value.trim();
+            let dist = document.getElementById('setupDistrict').value.trim();
+
+            if (!profId) {
+                alert("Please enter a valid Player ID.");
+                return;
+            }
+
+            currentProfile = profId;
+            schoolDetails = { name: schName || "Z.P. School", taluka: tal || "-", district: dist || "-" };
+
+            saveProfileData();
+            enterMainDesk();
+        }
+
+        function enterMainDesk() {
+            let profiles = getSavedProfiles();
+            if (profiles.length > 0 && document.getElementById('existingUserSection').classList.contains('hidden') === false) {
+                currentProfile = document.getElementById('loginProfileSelector').value;
+            }
+            loadProfileData();
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('mainDeskContainer').classList.remove('hidden');
+        }
+
+        function logoutToGate() {
+            updateLoginGate();
+            document.getElementById('mainDeskContainer').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+        }
+
+        function switchTab(tabName) {
+            ['hub', 'excel', 'tools'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`btn-${t}`).className = "py-3 font-semibold text-xs text-slate-400 border-b-2 border-transparent hover:text-slate-700 transition";
+            });
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`btn-${tabName}`).className = "py-3 font-semibold text-xs text-indigo-600 border-b-2 border-indigo-600 transition";
+        }
+
+        function switchUserProfile() {
+            const selector = document.getElementById('userProfileSelector');
+            currentProfile = selector.value;
+            loadProfileData();
+        }
+
+        function openLoginProfileModal() {
+            let profiles = getSavedProfiles();
+            document.getElementById('modalProfId').value = "Player_" + (profiles.length + 1);
+            document.getElementById('modalSchoolName').value = "";
+            document.getElementById('modalTaluka').value = "";
+            document.getElementById('modalDistrict').value = "";
+            document.getElementById('profileModal').classList.remove('hidden');
+        }
+
+        function openProfileModal() {
+            let profiles = getSavedProfiles();
+            document.getElementById('modalProfId').value = "Player_" + (profiles.length + 1);
+            document.getElementById('modalSchoolName').value = "";
+            document.getElementById('modalTaluka').value = "";
+            document.getElementById('modalDistrict').value = "";
+            document.getElementById('profileModal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.add('hidden');
+        }
+
+        function saveNewProfileFromModal() {
+            let profId = document.getElementById('modalProfId').value.trim().replace(/\s+/g, '_');
+            let schName = document.getElementById('modalSchoolName').value.trim();
+            let tal = document.getElementById('modalTaluka').value.trim();
+            let dist = document.getElementById('modalDistrict').value.trim();
+
+            if (!profId) {
+                alert("Please enter a valid Profile ID.");
+                return;
+            }
+
+            currentProfile = profId;
+            schoolDetails = { name: schName || "Z.P. School", taluka: tal || "-", district: dist || "-" };
+
+            saveProfileData();
+            closeProfileModal();
+            loadProfileData();
+            updateLoginGate();
+        }
+
+        function onMonthChanged() {
+            const val = document.getElementById('globalMonthSelector').value;
+            if (val) {
+                selectedRegisterMonth = val;
+                document.getElementById('activeMonthDisplay').textContent = formatDisplayMonth(selectedRegisterMonth);
+                
+                document.getElementById('inputDate').value = selectedRegisterMonth + "-01";
+                document.getElementById('bulkStartDate').value = selectedRegisterMonth + "-01";
+                let [yr, mo] = selectedRegisterMonth.split('-');
+                let lastDay = new Date(yr, mo, 0).getDate();
+                document.getElementById('bulkEndDate').value = `${selectedRegisterMonth}-${lastDay}`;
+                
+                saveProfileData();
+            }
+        }
+
+        function formatDisplayMonth(YYYY_MM) {
+            if (!YYYY_MM) return "Jun-2026";
+            let parts = YYYY_MM.split('-');
+            if (parts.length < 2) return YYYY_MM;
+            let yr = parts[0];
+            let moNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            let moIdx = parseInt(parts[1], 10) - 1;
+            return `${moNames[moIdx] || 'Jun'}-${yr}`;
+        }
+
+        function saveProfileData() {
+            let profileState = {
+                menuPresets: menuPresets,
+                globalHeaders: globalHeaders,
+                globalRecords: globalRecords,
+                originalRow0Meta: originalRow0Meta,
+                originalRow2Meta: originalRow2Meta,
+                schoolDetails: schoolDetails,
+                originalFileName: originalFileName,
+                selectedRegisterMonth: selectedRegisterMonth
+            };
+            localStorage.setItem("pmposhan_profile_" + currentProfile, JSON.stringify(profileState));
+        }
+
+        function loadProfileData() {
+            document.getElementById('activeProfileNameDisp').textContent = currentProfile;
+            let saved = localStorage.getItem("pmposhan_profile_" + currentProfile);
+            if (saved) {
+                try {
+                    let state = JSON.parse(saved);
+                    menuPresets = state.menuPresets || JSON.parse(JSON.stringify(defaultMenuPresets));
+                    globalHeaders = state.globalHeaders || [];
+                    globalRecords = state.globalRecords || [];
+                    originalRow0Meta = state.originalRow0Meta || [];
+                    originalRow2Meta = state.originalRow2Meta || [];
+                    schoolDetails = state.schoolDetails || { name: "", taluka: "", district: "" };
+                    originalFileName = state.originalFileName || "pm_poshan_filled.xlsx";
+                    selectedRegisterMonth = state.selectedRegisterMonth || "2026-06";
+
+                    document.getElementById('globalMonthSelector').value = selectedRegisterMonth;
+                    document.getElementById('activeMonthDisplay').textContent = formatDisplayMonth(selectedRegisterMonth);
+
+                    if (schoolDetails.name) {
+                        let headerStr = `${schoolDetails.name} (Tal: ${schoolDetails.taluka}, Dist: ${schoolDetails.district})`;
+                        document.getElementById('schoolBadge').textContent = headerStr;
+                    }
+
+                    if (globalHeaders.length > 0) {
+                        document.getElementById('uploadStep').classList.add('hidden');
+                        document.getElementById('formStep').classList.remove('hidden');
+                        document.getElementById('fileNameDisplay').textContent = originalFileName;
+                        populateStockInputs();
+                        rebuildMenuSelector();
+                        renderMaterialInputs();
+                        renderTablePreview();
+                        updateStats();
+                        calculateLedgerSummary();
+                        updateLoginGate();
+                        return;
+                    }
+                } catch(e) {}
+            }
+
+            menuPresets = JSON.parse(JSON.stringify(defaultMenuPresets));
+            globalHeaders = [];
+            globalRecords = [];
+            originalRow0Meta = [];
+            originalRow2Meta = [];
+            originalFileName = "pm_poshan_filled.xlsx";
+            selectedRegisterMonth = "2026-06";
+            document.getElementById('globalMonthSelector').value = selectedRegisterMonth;
+            document.getElementById('activeMonthDisplay').textContent = formatDisplayMonth(selectedRegisterMonth);
+
+            if (schoolDetails.name) {
+                document.getElementById('schoolBadge').textContent = `${schoolDetails.name} (${schoolDetails.taluka}, ${schoolDetails.district})`;
+            } else {
+                document.getElementById('schoolBadge').textContent = "No School Loaded";
+            }
+            document.getElementById('formStep').classList.add('hidden');
+            document.getElementById('uploadStep').classList.remove('hidden');
+            rebuildMenuSelector();
+            renderMaterialInputs();
+            updateLoginGate();
+        }
+
+        function rebuildMenuSelector() {
+            const selector = document.getElementById('presetMenuSelector');
+            selector.innerHTML = '';
+            for (let key in menuPresets) {
+                let opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = menuPresets[key].name;
+                selector.appendChild(opt);
+            }
+        }
+
+        function generateFreshOfficialSheet() {
+            if (!schoolDetails.name) {
+                schoolDetails.name = "Z.P. School";
+                schoolDetails.taluka = "Taluka";
+                schoolDetails.district = "District";
+            }
+
+            originalFileName = `PM_Poshan_${formatDisplayMonth(selectedRegisterMonth)}.xlsx`;
+            document.getElementById('fileNameDisplay').textContent = originalFileName;
+
+            originalRow0Meta = [schoolDetails.name, "", "", "", "", formatDisplayMonth(selectedRegisterMonth), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            globalHeaders = ["अ.नं.", "दिनांक", "वार", "पट", "लाभार्थी", "मेनू", ...allMaterials];
+            originalRow2Meta = ["", "", "", "", "मागील शिल्लक", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+            globalRecords = [];
+            populateStockInputs();
+            renderMaterialInputs();
+            renderTablePreview();
+            updateStats();
+            calculateLedgerSummary();
+            saveProfileData();
+
+            document.getElementById('uploadStep').classList.add('hidden');
+            document.getElementById('formStep').classList.remove('hidden');
+            
+            document.getElementById('inputDate').value = selectedRegisterMonth + "-01";
+            document.getElementById('bulkStartDate').value = selectedRegisterMonth + "-01";
+            let [yr, mo] = selectedRegisterMonth.split('-');
+            let lastDay = new Date(yr, mo, 0).getDate();
+            document.getElementById('bulkEndDate').value = `${selectedRegisterMonth}-${lastDay}`;
+
+            previewConsumption();
+            alert(`Official PM Poshan register for ${formatDisplayMonth(selectedRegisterMonth)} generated with zero default balances!`);
+        }
+
+        function handleExcelUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            originalFileName = file.name;
+            document.getElementById('fileNameDisplay').textContent = originalFileName;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                loadedWorkbook = XLSX.read(data, {type: 'array'});
+                const firstSheetName = loadedWorkbook.SheetNames[0];
+                const worksheet = loadedWorkbook.Sheets[firstSheetName];
+                
+                rawSheetData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                
+                if (rawSheetData.length > 0) {
+                    originalRow0Meta = rawSheetData[0];
+                    let extractedName = (originalRow0Meta.length > 0 && originalRow0Meta[0]) ? originalRow0Meta[0] : "Z.P. School";
+                    if (!schoolDetails.name) schoolDetails.name = extractedName;
+                    let headerStr = `${schoolDetails.name} (Tal: ${schoolDetails.taluka || '-'}, Dist: ${schoolDetails.district || '-'})`;
+                    document.getElementById('schoolBadge').textContent = headerStr;
+                }
+
+                if (rawSheetData.length > 2) originalRow2Meta = rawSheetData[2]; 
+
+                if (rawSheetData.length > 1) {
+                    let row0 = rawSheetData[0] || [];
+                    let row1 = rawSheetData[1] || [];
+                    
+                    globalHeaders = row1.map((h1, idx) => {
+                        let val = h1 !== undefined && h1 !== null ? String(h1).trim() : '';
+                        if (!val || val === 'nan') {
+                            let r0Val = row0[idx] !== undefined ? String(row0[idx]).trim() : '';
+                            if (r0Val && r0Val.includes('शिल्लक')) return r0Val;
+                            return `Col_${idx}`;
+                        }
+                        return val;
+                    });
+                } else {
+                    globalHeaders = ["अ.नं.", "दिनांक", "वार", "पट", "लाभार्थी", "मेनू", ...allMaterials];
+                }
+
+                populateStockInputs();
+                renderMaterialInputs();
+                globalRecords = [];
+                renderTablePreview();
+                calculateLedgerSummary();
+                saveProfileData();
+                document.getElementById('uploadStep').classList.add('hidden');
+                document.getElementById('formStep').classList.remove('hidden');
+                
+                document.getElementById('inputDate').value = selectedRegisterMonth + "-01";
+                document.getElementById('bulkStartDate').value = selectedRegisterMonth + "-01";
+                let [yr, mo] = selectedRegisterMonth.split('-');
+                let lastDay = new Date(yr, mo, 0).getDate();
+                document.getElementById('bulkEndDate').value = `${selectedRegisterMonth}-${lastDay}`;
+
+                previewConsumption();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function renderMaterialInputs() {
+            const container = document.getElementById('materialInputsGrid');
+            container.innerHTML = '';
+            const presetKey = document.getElementById('presetMenuSelector').value;
+            const currentPreset = menuPresets[presetKey] || menuPresets["MONDAY"];
+            const currentRates = currentPreset.rates;
+
+            allMaterials.forEach(mat => {
+                let val = (currentRates[mat] !== undefined && currentRates[mat] !== "") ? currentRates[mat] : "";
+                let div = document.createElement('div');
+                div.innerHTML = `
+                    <label class="block text-xs font-medium text-slate-600 mb-1 truncate">${mat}</label>
+                    <input type="number" step="0.00001" id="rate_${mat}" value="${val}" oninput="previewConsumption()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="0">
+                `;
+                container.appendChild(div);
+            });
+            previewConsumption();
+        }
+
+        function loadMenuPreset() {
+            renderMaterialInputs();
+        }
+
+        function openAddMenuModal() {
+            document.getElementById('customMenuBox').classList.remove('hidden');
+            document.getElementById('newMenuNameInput').value = '';
+            document.getElementById('newMenuNameInput').focus();
+        }
+
+        function closeAddMenuModal() {
+            document.getElementById('customMenuBox').classList.add('hidden');
+        }
+
+        function saveNewMenu() {
+            const menuNameInput = document.getElementById('newMenuNameInput').value.trim();
+            if (!menuNameInput) {
+                alert("Please enter a valid menu name.");
+                return;
+            }
+
+            let newRates = {};
+            allMaterials.forEach(mat => {
+                let elem = document.getElementById(`rate_${mat}`);
+                newRates[mat] = elem && elem.value !== "" ? parseFloat(elem.value) : "";
+            });
+
+            let uniqueKey = "CUSTOM_" + Date.now();
+            menuPresets[uniqueKey] = { name: menuNameInput, rates: newRates };
+
+            rebuildMenuSelector();
+            document.getElementById('presetMenuSelector').value = uniqueKey;
+            closeAddMenuModal();
+            renderMaterialInputs();
+            saveProfileData();
+            alert(`Custom menu "${menuNameInput}" added!`);
+        }
+
+        function populateStockInputs() {
+            let riceVal = 0, dalVal = 0, oilVal = 0, saltVal = 0;
+            globalHeaders.forEach((h, idx) => {
+                let val = parseFloat(originalRow2Meta[idx]) || 0;
+                if (h.includes('तांदूळ')) riceVal = val;
+                if (h.includes('तुरडाळ') || h.includes('मूग डाळ')) dalVal = val;
+                if (h.includes('सोय तेल')) oilVal = val;
+                if (h.includes('मीठ')) saltVal = val;
+            });
+            document.getElementById('stockRice').value = riceVal;
+            document.getElementById('stockDal').value = dalVal;
+            document.getElementById('stockOil').value = oilVal;
+            document.getElementById('stockSalt').value = saltVal;
+        }
+
+        function applyOpeningBalances() {
+            let rice = document.getElementById('stockRice').value;
+            let dal = document.getElementById('stockDal').value;
+            let oil = document.getElementById('stockOil').value;
+            let salt = document.getElementById('stockSalt').value;
+
+            globalHeaders.forEach((h, idx) => {
+                if (h.includes('तांदूळ')) originalRow2Meta[idx] = parseFloat(rice) || 0;
+                if (h.includes('तुरडाळ') || h.includes('मूग डाळ')) originalRow2Meta[idx] = parseFloat(dal) || 0;
+                if (h.includes('सोय तेल')) originalRow2Meta[idx] = parseFloat(oil) || 0;
+                if (h.includes('मीठ')) originalRow2Meta[idx] = parseFloat(salt) || 0;
+            });
+            calculateLedgerSummary();
+            saveProfileData();
+            alert("Opening balances applied!");
+        }
+
+        function applyAttendanceSync() {
+            let pat = parseFloat(document.getElementById('syncTotalPat').value) || 22;
+            document.getElementById('inputPat').value = pat;
+
+            let pctSelect = document.getElementById('syncAttendancePct').value;
+            if (pctSelect !== 'custom') {
+                let pct = parseFloat(pctSelect) || 100;
+                let calculatedBen = Math.round((pat * pct) / 100);
+                document.getElementById('inputBeneficiaries').value = calculatedBen;
+                previewConsumption();
+            }
+        }
+
+        function previewConsumption() {
+            const b = parseFloat(document.getElementById('inputBeneficiaries').value) || 0;
+            const container = document.getElementById('livePreviewContainer');
+            container.innerHTML = '';
+
+            allMaterials.forEach(mat => {
+                let inputElem = document.getElementById(`rate_${mat}`);
+                if (!inputElem) return;
+                let rateVal = parseFloat(inputElem.value);
+                if (!isNaN(rateVal) && rateVal > 0) {
+                    let total = b * rateVal;
+                    let formatted = total < 0.01 ? total.toFixed(4) : total.toFixed(3);
+                    let badge = document.createElement('div');
+                    badge.className = "bg-white border border-slate-200/60 px-3 py-1.5 rounded-lg shadow-2xs";
+                    badge.innerHTML = `${mat}: <strong class="text-slate-900">${formatted}</strong>`;
+                    container.appendChild(badge);
+                }
+            });
+        }
+
+        function calculateLedgerSummary() {
+            const container = document.getElementById('ledgerSummaryGrid');
+            container.innerHTML = '';
+
+            let totals = {};
+            allMaterials.forEach(m => totals[m] = 0);
+
+            globalRecords.forEach(rec => {
+                globalHeaders.forEach(h => {
+                    allMaterials.forEach(m => {
+                        if (h.includes(m)) {
+                            let val = parseFloat(rec[h]) || 0;
+                            totals[m] += val;
+                        }
+                    });
+                });
+            });
+
+            allMaterials.forEach(mat => {
+                let opening = 0;
+                globalHeaders.forEach((h, idx) => {
+                    if (h.includes(mat)) {
+                        opening = parseFloat(originalRow2Meta[idx]) || 0;
+                    }
+                });
+
+                let consumed = totals[mat];
+                let closing = opening - consumed;
+                if (closing < 0) closing = 0;
+
+                let div = document.createElement('div');
+                div.className = "bg-slate-50 border border-slate-200/60 p-3.5 rounded-xl space-y-1";
+                div.innerHTML = `
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block truncate">${mat}</span>
+                    <div class="text-[11px] text-slate-500 flex justify-between"><span>OP: ${opening.toFixed(2)}</span><span>US: ${consumed.toFixed(2)}</span></div>
+                    <div class="text-sm font-bold text-slate-800">CL: ${closing.toFixed(2)}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function toggleExceptionBox() {
+            document.getElementById('exceptionSection').classList.toggle('hidden');
+        }
+
+        function addExceptionDate() {
+            const val = document.getElementById('exceptionDateInput').value;
+            if (!val) return;
+            if (!exceptionDates.includes(val)) {
+                exceptionDates.push(val);
+                renderExceptions();
+            }
+            document.getElementById('exceptionDateInput').value = '';
+        }
+
+        function removeException(dateStr) {
+            exceptionDates = exceptionDates.filter(d => d !== dateStr);
+            renderExceptions();
+        }
+
+        function clearExceptions() {
+            exceptionDates = [];
+            renderExceptions();
+        }
+
+        function renderExceptions() {
+            const list = document.getElementById('exceptionList');
+            document.getElementById('exceptionCount').textContent = exceptionDates.length;
+            list.innerHTML = '';
+            exceptionDates.forEach(d => {
+                let badge = document.createElement('span');
+                badge.className = "bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg text-xs flex items-center gap-2 shadow-2xs font-medium";
+                badge.innerHTML = `${d} <button onclick="removeException('${d}')" class="text-rose-500 font-bold hover:text-rose-700">×</button>`;
+                list.appendChild(badge);
+            });
+        }
+
+        function addDailyEntry() {
+            const startDateStr = document.getElementById('bulkStartDate').value;
+            const endDateStr = document.getElementById('bulkEndDate').value;
+
+            let dateVal = document.getElementById('inputDate').value;
+            let dayVal = document.getElementById('inputDay').value;
+            let patVal = document.getElementById('inputPat').value;
+            let benVal = document.getElementById('inputBeneficiaries').value;
+            let bNum = parseFloat(benVal) || 0;
+
+            const presetKey = document.getElementById('presetMenuSelector').value;
+            let menuNameText = menuPresets[presetKey] ? menuPresets[presetKey].name : "Menu";
+
+            if (!startDateStr || !endDateStr) {
+                let record = buildRecordObject(dateVal, dayVal, patVal, benVal, bNum, menuNameText);
+                globalRecords.push(record);
+                renderTablePreview();
+                updateStats();
+                calculateLedgerSummary();
+                saveProfileData();
+                alert("Daily entry recorded!");
+                return;
+            }
+
+            let curr = new Date(startDateStr);
+            let end = new Date(endDateStr);
+            if (curr > end) {
+                alert("Start Date cannot be after End Date.");
+                return;
+            }
+
+            let addedCount = 0;
+            const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+
+            while (curr <= end) {
+                let yyyy = curr.getFullYear();
+                let mm = String(curr.getMonth() + 1).padStart(2, '0');
+                let dd = String(curr.getDate()).padStart(2, '0');
+                let dateFormatted = `${yyyy}-${mm}-${dd}`;
+
+                if (dateFormatted.startsWith(selectedRegisterMonth) && !exceptionDates.includes(dateFormatted)) {
+                    let dayName = days[curr.getDay()];
+                    let record = buildRecordObject(dateFormatted, dayName, patVal, benVal, bNum, menuNameText);
+                    record['अ.नं.'] = globalRecords.length + 1;
+                    globalRecords.push(record);
+                    addedCount++;
+                }
+                curr.setDate(curr.getDate() + 1);
+            }
+
+            renderTablePreview();
+            updateStats();
+            calculateLedgerSummary();
+            saveProfileData();
+            alert(`Generated ${addedCount} days of records!`);
+        }
+
+        function buildRecordObject(dateStr, dayStr, pat, ben, bNum, menuNameText) {
+            let obj = {};
+            globalHeaders.forEach(h => {
+                if (h.includes('अ.नं.')) obj[h] = globalRecords.length + 1;
+                else if (h.includes('दिनांक')) obj[h] = dateStr;
+                else if (h.includes('वार')) obj[h] = dayStr;
+                else if (h.includes('पट')) obj[h] = pat;
+                else if (h.includes('लाभार्थी')) obj[h] = ben;
+                else if (h.includes('मेनू')) obj[h] = menuNameText;
+                else {
+                    let matchedMat = allMaterials.find(m => h.includes(m));
+                    if (matchedMat) {
+                        let inputElem = document.getElementById(`rate_${matchedMat}`);
+                        let rateVal = inputElem ? parseFloat(inputElem.value) : NaN;
+                        if (!isNaN(rateVal) && rateVal > 0) {
+                            let total = bNum * rateVal;
+                            obj[h] = total < 0.01 ? total.toFixed(4) : total.toFixed(3);
+                        } else {
+                            obj[h] = ""; 
+                        }
+                    } else {
+                        obj[h] = "";
+                    }
+                }
+            });
+            return obj;
+        }
+
+        function clearForm() {
+            document.getElementById('bulkStartDate').value = selectedRegisterMonth + "-01";
+            let [yr, mo] = selectedRegisterMonth.split('-');
+            let lastDay = new Date(yr, mo, 0).getDate();
+            document.getElementById('bulkEndDate').value = `${selectedRegisterMonth}-${lastDay}`;
+            previewConsumption();
+        }
+
+        function clearAllRecords() {
+            if (confirm("Clear all recorded entries?")) {
+                globalRecords = [];
+                renderTablePreview();
+                updateStats();
+                calculateLedgerSummary();
+                saveProfileData();
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('statRecordCount').textContent = globalRecords.length + " Days";
+            let totalB = 0;
+            globalRecords.forEach(r => {
+                globalHeaders.forEach(h => {
+                    if (h.includes('लाभार्थी')) {
+                        let n = parseFloat(r[h]);
+                        if (!isNaN(n)) totalB += n;
+                    }
+                });
+            });
+            document.getElementById('statTotalStudents').textContent = totalB + " Served";
+        }
+
+        function renderTablePreview() {
+            const thead = document.getElementById('tableHeader');
+            const tbody = document.getElementById('tableBody');
+
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            if (globalHeaders.length === 0) return;
+
+            let headerTr = document.createElement('tr');
+            globalHeaders.forEach(header => {
+                let th = document.createElement('th');
+                th.className = "p-3 font-bold border-b border-slate-200 truncate text-slate-700 bg-slate-50";
+                th.textContent = header;
+                headerTr.appendChild(th);
+            });
+            thead.appendChild(headerTr);
+
+            globalRecords.forEach(record => {
+                let tr = document.createElement('tr');
+                globalHeaders.forEach(header => {
+                    let td = document.createElement('td');
+                    td.className = "p-3 border-b border-slate-100 truncate max-w-[120px] text-slate-600";
+                    td.textContent = record[header] !== undefined ? record[header] : "";
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openPrintReport() {
+            document.getElementById('reportSchoolName').textContent = schoolDetails.name || "Z.P. School";
+            document.getElementById('reportLocation').textContent = `तालुका: ${schoolDetails.taluka || '-'} | जिल्हा: ${schoolDetails.district || '-'}`;
+            document.getElementById('repMonth').textContent = formatDisplayMonth(selectedRegisterMonth);
+            document.getElementById('repDays').textContent = globalRecords.length;
+            
+            let totalB = 0;
+            globalRecords.forEach(r => {
+                globalHeaders.forEach(h => {
+                    if (h.includes('लाभार्थी')) totalB += parseFloat(r[h]) || 0;
+                });
+            });
+            document.getElementById('repBeneficiaries').textContent = totalB;
+
+            let totals = {};
+            allMaterials.forEach(m => totals[m] = 0);
+            globalRecords.forEach(rec => {
+                globalHeaders.forEach(h => {
+                    allMaterials.forEach(m => {
+                        if (h.includes(m)) totals[m] += parseFloat(rec[h]) || 0;
+                    });
+                });
+            });
+
+            const tbody = document.getElementById('reportLedgerBody');
+            tbody.innerHTML = '';
+
+            allMaterials.forEach(mat => {
+                let opening = 0;
+                globalHeaders.forEach((h, idx) => {
+                    if (h.includes(mat)) opening = parseFloat(originalRow2Meta[idx]) || 0;
+                });
+                let consumed = totals[mat];
+                let closing = Math.max(0, opening - consumed);
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2.5 border-r border-slate-200 font-medium text-slate-700">${mat}</td>
+                    <td class="p-2.5 border-r border-slate-200 text-slate-600">${opening.toFixed(2)}</td>
+                    <td class="p-2.5 border-r border-slate-200 text-slate-600">${consumed.toFixed(2)}</td>
+                    <td class="p-2.5 font-bold text-slate-900">${closing.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('printReportModal').classList.remove('hidden');
+        }
+
+        function closePrintReport() {
+            document.getElementById('printReportModal').classList.add('hidden');
+        }
+
+        function downloadFilledExcel() {
+            if (globalRecords.length === 0) {
+                alert("Please add at least one record before downloading.");
+                return;
+            }
+
+            let exportData = [];
+            let row0 = [...originalRow0Meta];
+            if (schoolDetails.name) row0[0] = schoolDetails.name;
+            row0[5] = formatDisplayMonth(selectedRegisterMonth);
+            exportData.push(row0);
+            exportData.push(globalHeaders);
+            exportData.push(originalRow2Meta); 
+
+            globalRecords.forEach(record => {
+                let rowArr = globalHeaders.map(header => record[header] !== undefined ? record[header] : "");
+                exportData.push(rowArr);
+            });
+
+            const newWs = XLSX.utils.aoa_to_sheet(exportData);
+            const newWb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(newWb, newWs, "Daily Register");
+            XLSX.writeFile(newWb, `PM_Poshan_${currentProfile}_${formatDisplayMonth(selectedRegisterMonth)}.xlsx`);
+        }
+
+        function resetWizard() {
+            document.getElementById('excelFile').value = '';
+            document.getElementById('formStep').classList.add('hidden');
+            document.getElementById('uploadStep').classList.remove('hidden');
+            globalHeaders = [];
+            globalRecords = [];
+            exceptionDates = [];
+            localStorage.removeItem("pmposhan_profile_" + currentProfile);
+            loadProfileData();
+        }
+
+        function calculateAge() {
+            const dob = new Date(document.getElementById('dob').value);
+            const cutoff = new Date(document.getElementById('cutoffDate').value);
+            const res = document.getElementById('ageResult');
+            if (isNaN(dob) || isNaN(cutoff)) {
+                res.classList.remove('hidden');
+                res.textContent = "Please select valid dates.";
+                return;
+            }
+            let y = cutoff.getFullYear() - dob.getFullYear();
+            let m = cutoff.getMonth() - dob.getMonth();
+            if (m < 0) { y--; m += 12; }
+            res.classList.remove('hidden');
+            res.textContent = `Exact Age: ${y} years, ${m} months`;
+        }
+
+        function copyText(id) {
+            navigator.clipboard.writeText(document.getElementById(id).innerText);
+            const alertBox = document.getElementById('copyAlert');
+            alertBox.classList.remove('hidden');
+            setTimeout(() => alertBox.classList.add('hidden'), 2000);
+        }
+
+        window.onload = function() {
+            updateLoginGate();
+        };
+    </script>
+</body>
+</html>
