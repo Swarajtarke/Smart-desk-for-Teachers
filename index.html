@@ -253,33 +253,16 @@
                         </div>
                     </div>
 
-                    <!-- Opening Balance Card -->
+                    <!-- Opening Balance Card (Expanded to all 16 items) -->
                     <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
                         <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                             <div>
                                 <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Last Month's Remaining Stock (शिल्लक)</h3>
-                                <p class="text-xs text-slate-500">Zero-balance minimal default active.</p>
+                                <p class="text-xs text-slate-500">Configure remaining opening stock for all materials.</p>
                             </div>
                             <button onclick="applyOpeningBalances()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 text-xs rounded-lg transition">Apply</button>
                         </div>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">Rice (तांदूळ Kg)</label>
-                                <input type="number" step="0.1" id="stockRice" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" value="0">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">Dal (तुरडाळ Kg)</label>
-                                <input type="number" step="0.1" id="stockDal" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" value="0">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">Oil (सोय तेल Kg)</label>
-                                <input type="number" step="0.001" id="stockOil" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" value="0">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">Salt (मीठ Kg)</label>
-                                <input type="number" step="0.001" id="stockSalt" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" value="0">
-                            </div>
-                        </div>
+                        <div id="stockInputsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
                     </div>
 
                     <!-- Monthly Stock Ledger Summary Box -->
@@ -841,7 +824,7 @@
                         document.getElementById('uploadStep').classList.add('hidden');
                         document.getElementById('formStep').classList.remove('hidden');
                         document.getElementById('fileNameDisplay').textContent = originalFileName;
-                        populateStockInputs();
+                        renderStockInputs();
                         rebuildMenuSelector();
                         renderMaterialInputs();
                         renderTablePreview();
@@ -870,6 +853,7 @@
             }
             document.getElementById('formStep').classList.add('hidden');
             document.getElementById('uploadStep').classList.remove('hidden');
+            renderStockInputs();
             rebuildMenuSelector();
             renderMaterialInputs();
             updateLoginGate();
@@ -901,7 +885,7 @@
             originalRow2Meta = ["", "", "", "", "मागील शिल्लक", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
             globalRecords = [];
-            populateStockInputs();
+            renderStockInputs();
             renderMaterialInputs();
             renderTablePreview();
             updateStats();
@@ -964,7 +948,7 @@
                     globalHeaders = ["अ.नं.", "दिनांक", "वार", "पट", "लाभार्थी", "मेनू", ...allMaterials];
                 }
 
-                populateStockInputs();
+                renderStockInputs();
                 renderMaterialInputs();
                 globalRecords = [];
                 renderTablePreview();
@@ -982,6 +966,27 @@
                 previewConsumption();
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        function renderStockInputs() {
+            const container = document.getElementById('stockInputsGrid');
+            container.innerHTML = '';
+
+            allMaterials.forEach(mat => {
+                let val = 0;
+                globalHeaders.forEach((h, idx) => {
+                    if (h.includes(mat)) {
+                        val = parseFloat(originalRow2Meta[idx]) || 0;
+                    }
+                });
+
+                let div = document.createElement('div');
+                div.innerHTML = `
+                    <label class="block text-xs font-medium text-slate-600 mb-1 truncate">${mat}</label>
+                    <input type="number" step="0.001" id="stock_${mat}" value="${val}" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="0">
+                `;
+                container.appendChild(div);
+            });
         }
 
         function renderMaterialInputs() {
@@ -1041,36 +1046,20 @@
             alert(`Custom menu "${menuNameInput}" added!`);
         }
 
-        function populateStockInputs() {
-            let riceVal = 0, dalVal = 0, oilVal = 0, saltVal = 0;
-            globalHeaders.forEach((h, idx) => {
-                let val = parseFloat(originalRow2Meta[idx]) || 0;
-                if (h.includes('तांदूळ')) riceVal = val;
-                if (h.includes('तुरडाळ') || h.includes('मूग डाळ')) dalVal = val;
-                if (h.includes('सोय तेल')) oilVal = val;
-                if (h.includes('मीठ')) saltVal = val;
-            });
-            document.getElementById('stockRice').value = riceVal;
-            document.getElementById('stockDal').value = dalVal;
-            document.getElementById('stockOil').value = oilVal;
-            document.getElementById('stockSalt').value = saltVal;
-        }
-
         function applyOpeningBalances() {
-            let rice = document.getElementById('stockRice').value;
-            let dal = document.getElementById('stockDal').value;
-            let oil = document.getElementById('stockOil').value;
-            let salt = document.getElementById('stockSalt').value;
-
-            globalHeaders.forEach((h, idx) => {
-                if (h.includes('तांदूळ')) originalRow2Meta[idx] = parseFloat(rice) || 0;
-                if (h.includes('तुरडाळ') || h.includes('मूग डाळ')) originalRow2Meta[idx] = parseFloat(dal) || 0;
-                if (h.includes('सोय तेल')) originalRow2Meta[idx] = parseFloat(oil) || 0;
-                if (h.includes('मीठ')) originalRow2Meta[idx] = parseFloat(salt) || 0;
+            allMaterials.forEach(mat => {
+                let elem = document.getElementById(`stock_${mat}`);
+                let val = elem ? parseFloat(elem.value) || 0 : 0;
+                globalHeaders.forEach((h, idx) => {
+                    if (h.includes(mat)) {
+                        originalRow2Meta[idx] = val;
+                    }
+                });
             });
+
             calculateLedgerSummary();
             saveProfileData();
-            alert("Opening balances applied!");
+            alert("All opening remaining stock balances applied successfully!");
         }
 
         function applyAttendanceSync() {
