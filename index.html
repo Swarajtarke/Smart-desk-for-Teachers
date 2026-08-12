@@ -253,24 +253,48 @@
                         </div>
                     </div>
 
-                    <!-- Opening Balance Card (Expanded to all 16 items) -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <!-- Opening Stock / Previous Remaining + New Receipt Card -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
                             <div>
-                                <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Last Month's Remaining Stock (शिल्लक)</h3>
-                                <p class="text-xs text-slate-500">Configure remaining opening stock for all materials.</p>
+                                <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Opening Stock Calculation</h3>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    Opening Stock = Last Month's Remaining + New Material Received
+                                </p>
                             </div>
-                            <button onclick="applyOpeningBalances()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 text-xs rounded-lg transition">Apply</button>
+                            <button onclick="applyOpeningBalances()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 text-xs rounded-lg transition shadow-sm">
+                                Apply Stock
+                            </button>
                         </div>
-                        <div id="stockInputsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Last Month's Remaining Stock (मागील शिल्लक)</h4>
+                                <p class="text-[11px] text-slate-500 mt-1">मागील महिन्यातील शिल्लक प्रमाण.</p>
+                            </div>
+                            <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+                                <h4 class="text-xs font-bold text-indigo-700 uppercase tracking-wider">New Material Received (नवीन प्राप्त)</h4>
+                                <p class="text-[11px] text-slate-500 mt-1">या महिन्यात प्राप्त झालेले नवीन प्रमाण.</p>
+                            </div>
+                        </div>
+
+                        <div id="stockInputsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+                        <div class="bg-slate-50 border border-slate-200/60 rounded-xl p-3">
+                            <p class="text-xs text-slate-600">
+                                📦 सर्व 16 साहित्यांचे एकक <strong>Kg</strong> आहे. दशांश मूल्ये स्वीकारली जातील.
+                                <strong>ऋण (-) मूल्ये स्वीकारली जाणार नाहीत.</strong>
+                            </p>
+                        </div>
                     </div>
 
                     <!-- Monthly Stock Ledger Summary Box -->
+
                     <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
                         <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                             <div>
                                 <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Monthly Ledger & Closing Balance</h3>
-                                <p class="text-xs text-slate-500">Opening Stock minus Consumption.</p>
+                                <p class="text-xs text-slate-500">Opening = Last Month Remaining + New Received; Closing = Opening − Consumption.</p>
                             </div>
                             <button onclick="calculateLedgerSummary()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 text-xs rounded-lg transition">Recalculate</button>
                         </div>
@@ -528,9 +552,11 @@
                     <thead class="bg-slate-50 text-slate-700 border-b border-slate-200">
                         <tr>
                             <th class="p-2.5 border-r border-slate-200 text-left">Material</th>
+                            <th class="p-2.5 border-r border-slate-200 text-left">Remaining</th>
+                            <th class="p-2.5 border-r border-slate-200 text-left">Received</th>
                             <th class="p-2.5 border-r border-slate-200 text-left">Opening</th>
                             <th class="p-2.5 border-r border-slate-200 text-left">Consumed</th>
-                            <th class="p-2.5 border-left text-left">Closing</th>
+                            <th class="p-2.5 text-left">Closing</th>
                         </tr>
                     </thead>
                     <tbody id="reportLedgerBody" class="divide-y divide-slate-100"></tbody>
@@ -563,7 +589,9 @@
         let originalFileName = "pm_poshan_filled.xlsx";
         let rawSheetData = null;
         let originalRow0Meta = [];
-        let originalRow2Meta = []; 
+        let originalRow2Meta = [];
+        let lastMonthRemaining = [];
+        let newMaterialReceived = [];
         let exceptionDates = [];
 
         const allMaterials = [
@@ -790,6 +818,8 @@
                 globalRecords: globalRecords,
                 originalRow0Meta: originalRow0Meta,
                 originalRow2Meta: originalRow2Meta,
+                lastMonthRemaining: lastMonthRemaining,
+                newMaterialReceived: newMaterialReceived,
                 schoolDetails: schoolDetails,
                 originalFileName: originalFileName,
                 selectedRegisterMonth: selectedRegisterMonth
@@ -808,9 +838,23 @@
                     globalRecords = state.globalRecords || [];
                     originalRow0Meta = state.originalRow0Meta || [];
                     originalRow2Meta = state.originalRow2Meta || [];
+                    lastMonthRemaining = Array.isArray(state.lastMonthRemaining)
+                        ? state.lastMonthRemaining
+                        : getMaterialBalancesFromMeta(originalRow2Meta);
+                    newMaterialReceived = Array.isArray(state.newMaterialReceived)
+                        ? state.newMaterialReceived
+                        : createZeroMaterialBalances();
                     schoolDetails = state.schoolDetails || { name: "", taluka: "", district: "" };
                     originalFileName = state.originalFileName || "pm_poshan_filled.xlsx";
                     selectedRegisterMonth = state.selectedRegisterMonth || "2026-06";
+
+                    // Backward compatibility for profiles created before the 16-material stock update.
+                    if (!Array.isArray(lastMonthRemaining) || lastMonthRemaining.length !== allMaterials.length) {
+                        lastMonthRemaining = getMaterialBalancesFromMeta(originalRow2Meta);
+                    }
+                    if (!Array.isArray(newMaterialReceived) || newMaterialReceived.length !== allMaterials.length) {
+                        newMaterialReceived = createZeroMaterialBalances();
+                    }
 
                     document.getElementById('globalMonthSelector').value = selectedRegisterMonth;
                     document.getElementById('activeMonthDisplay').textContent = formatDisplayMonth(selectedRegisterMonth);
@@ -824,7 +868,7 @@
                         document.getElementById('uploadStep').classList.add('hidden');
                         document.getElementById('formStep').classList.remove('hidden');
                         document.getElementById('fileNameDisplay').textContent = originalFileName;
-                        renderStockInputs();
+                        populateStockInputs();
                         rebuildMenuSelector();
                         renderMaterialInputs();
                         renderTablePreview();
@@ -841,6 +885,8 @@
             globalRecords = [];
             originalRow0Meta = [];
             originalRow2Meta = [];
+            lastMonthRemaining = createZeroMaterialBalances();
+            newMaterialReceived = createZeroMaterialBalances();
             originalFileName = "pm_poshan_filled.xlsx";
             selectedRegisterMonth = "2026-06";
             document.getElementById('globalMonthSelector').value = selectedRegisterMonth;
@@ -853,7 +899,6 @@
             }
             document.getElementById('formStep').classList.add('hidden');
             document.getElementById('uploadStep').classList.remove('hidden');
-            renderStockInputs();
             rebuildMenuSelector();
             renderMaterialInputs();
             updateLoginGate();
@@ -882,10 +927,12 @@
 
             originalRow0Meta = [schoolDetails.name, "", "", "", "", formatDisplayMonth(selectedRegisterMonth), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             globalHeaders = ["अ.नं.", "दिनांक", "वार", "पट", "लाभार्थी", "मेनू", ...allMaterials];
-            originalRow2Meta = ["", "", "", "", "मागील शिल्लक", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            originalRow2Meta = ["", "", "", "", "मागील शिल्लक", "", ...createZeroMaterialBalances()];
+            lastMonthRemaining = createZeroMaterialBalances();
+            newMaterialReceived = createZeroMaterialBalances();
 
             globalRecords = [];
-            renderStockInputs();
+            populateStockInputs();
             renderMaterialInputs();
             renderTablePreview();
             updateStats();
@@ -902,7 +949,7 @@
             document.getElementById('bulkEndDate').value = `${selectedRegisterMonth}-${lastDay}`;
 
             previewConsumption();
-            alert(`Official PM Poshan register for ${formatDisplayMonth(selectedRegisterMonth)} generated with zero default balances!`);
+            alert(`Official PM Poshan register for ${formatDisplayMonth(selectedRegisterMonth)} generated with 16-material stock tracking!`);
         }
 
         function handleExcelUpload(e) {
@@ -929,7 +976,34 @@
                     document.getElementById('schoolBadge').textContent = headerStr;
                 }
 
-                if (rawSheetData.length > 2) originalRow2Meta = rawSheetData[2]; 
+                if (rawSheetData.length > 2) {
+                    originalRow2Meta = rawSheetData[2] || [];
+                    lastMonthRemaining = getMaterialBalancesFromMeta(originalRow2Meta);
+                } else {
+                    originalRow2Meta = ["", "", "", "", "मागील शिल्लक", "", ...createZeroMaterialBalances()];
+                    lastMonthRemaining = createZeroMaterialBalances();
+                }
+
+                if (rawSheetData.length > 3) {
+                    const possibleReceivedRow = rawSheetData[3] || [];
+                    const receivedLabel = possibleReceivedRow[4] !== undefined
+                        ? String(possibleReceivedRow[4]).trim()
+                        : "";
+
+                    // Only treat row 3 as the "New Material Received" row when
+                    // the imported file explicitly identifies it as such.
+                    if (
+                        receivedLabel.includes("नवीन प्राप्त") ||
+                        receivedLabel.toLowerCase().includes("new material received") ||
+                        receivedLabel.toLowerCase().includes("received")
+                    ) {
+                        newMaterialReceived = getMaterialBalancesFromMeta(possibleReceivedRow);
+                    } else {
+                        newMaterialReceived = createZeroMaterialBalances();
+                    }
+                } else {
+                    newMaterialReceived = createZeroMaterialBalances();
+                }
 
                 if (rawSheetData.length > 1) {
                     let row0 = rawSheetData[0] || [];
@@ -948,7 +1022,7 @@
                     globalHeaders = ["अ.नं.", "दिनांक", "वार", "पट", "लाभार्थी", "मेनू", ...allMaterials];
                 }
 
-                renderStockInputs();
+                populateStockInputs();
                 renderMaterialInputs();
                 globalRecords = [];
                 renderTablePreview();
@@ -966,27 +1040,6 @@
                 previewConsumption();
             };
             reader.readAsArrayBuffer(file);
-        }
-
-        function renderStockInputs() {
-            const container = document.getElementById('stockInputsGrid');
-            container.innerHTML = '';
-
-            allMaterials.forEach(mat => {
-                let val = 0;
-                globalHeaders.forEach((h, idx) => {
-                    if (h.includes(mat)) {
-                        val = parseFloat(originalRow2Meta[idx]) || 0;
-                    }
-                });
-
-                let div = document.createElement('div');
-                div.innerHTML = `
-                    <label class="block text-xs font-medium text-slate-600 mb-1 truncate">${mat}</label>
-                    <input type="number" step="0.001" id="stock_${mat}" value="${val}" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="0">
-                `;
-                container.appendChild(div);
-            });
         }
 
         function renderMaterialInputs() {
@@ -1046,20 +1099,177 @@
             alert(`Custom menu "${menuNameInput}" added!`);
         }
 
-        function applyOpeningBalances() {
-            allMaterials.forEach(mat => {
-                let elem = document.getElementById(`stock_${mat}`);
-                let val = elem ? parseFloat(elem.value) || 0 : 0;
-                globalHeaders.forEach((h, idx) => {
-                    if (h.includes(mat)) {
-                        originalRow2Meta[idx] = val;
+        function createZeroMaterialBalances() {
+            return allMaterials.map(() => 0);
+        }
+
+        function getMaterialBalancesFromMeta(metaRow) {
+            const balances = createZeroMaterialBalances();
+
+            if (!Array.isArray(metaRow)) return balances;
+
+            allMaterials.forEach((mat, materialIndex) => {
+                let value = 0;
+
+                globalHeaders.forEach((header, headerIndex) => {
+                    if (header && String(header).includes(mat)) {
+                        const parsed = parseFloat(metaRow[headerIndex]);
+                        if (!isNaN(parsed) && parsed >= 0) value = parsed;
+                    }
+                });
+
+                balances[materialIndex] = value;
+            });
+
+            return balances;
+        }
+
+        function sanitizeNonNegativeNumber(value) {
+            const parsed = parseFloat(value);
+            return !isNaN(parsed) && parsed >= 0 ? parsed : 0;
+        }
+
+        function preventNegativeStockInput(event) {
+            if (event.key === '-' || event.key === 'e' || event.key === 'E') {
+                event.preventDefault();
+            }
+        }
+
+        function validateStockInput(input) {
+            if (!input) return;
+
+            if (input.value !== '') {
+                const value = parseFloat(input.value);
+                if (isNaN(value) || value < 0) {
+                    input.value = '0';
+                }
+            }
+        }
+
+        function getStockInputId(type, index) {
+            return `${type}Stock_${index}`;
+        }
+
+        function renderStockInputs() {
+            const container = document.getElementById('stockInputsGrid');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            allMaterials.forEach((mat, index) => {
+                const remaining = sanitizeNonNegativeNumber(lastMonthRemaining[index]);
+                const received = sanitizeNonNegativeNumber(newMaterialReceived[index]);
+                const opening = remaining + received;
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 border border-slate-200/70 p-4 rounded-xl space-y-3";
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <label class="text-xs font-bold text-slate-700 truncate" title="${mat}">${mat}</label>
+                        <span class="text-[10px] font-bold text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded-md">Kg</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-500 mb-1">मागील शिल्लक</label>
+                        <div class="flex items-center gap-2">
+                            <input
+                                type="number"
+                                min="0"
+                                step="0.001"
+                                inputmode="decimal"
+                                id="${getStockInputId('remaining', index)}"
+                                value="${remaining}"
+                                oninput="validateStockInput(this); updateOpeningStockPreview(${index})"
+                                onkeydown="preventNegativeStockInput(event)"
+                                class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition"
+                                placeholder="0.000">
+                            <span class="text-[11px] font-bold text-slate-500">Kg</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-medium text-indigo-600 mb-1">नवीन प्राप्त</label>
+                        <div class="flex items-center gap-2">
+                            <input
+                                type="number"
+                                min="0"
+                                step="0.001"
+                                inputmode="decimal"
+                                id="${getStockInputId('received', index)}"
+                                value="${received}"
+                                oninput="validateStockInput(this); updateOpeningStockPreview(${index})"
+                                onkeydown="preventNegativeStockInput(event)"
+                                class="w-full bg-white border border-indigo-100 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition"
+                                placeholder="0.000">
+                            <span class="text-[11px] font-bold text-slate-500">Kg</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-200/80 flex items-center justify-between">
+                        <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Opening Stock</span>
+                        <strong id="openingPreview_${index}" class="text-sm text-indigo-700">${opening.toFixed(3)} Kg</strong>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function updateOpeningStockPreview(index) {
+            const remainingInput = document.getElementById(getStockInputId('remaining', index));
+            const receivedInput = document.getElementById(getStockInputId('received', index));
+            const preview = document.getElementById(`openingPreview_${index}`);
+
+            if (!remainingInput || !receivedInput || !preview) return;
+
+            const remaining = sanitizeNonNegativeNumber(remainingInput.value);
+            const received = sanitizeNonNegativeNumber(receivedInput.value);
+
+            preview.textContent = `${(remaining + received).toFixed(3)} Kg`;
+        }
+
+        function populateStockInputs() {
+            if (!Array.isArray(lastMonthRemaining) || lastMonthRemaining.length !== allMaterials.length) {
+                lastMonthRemaining = getMaterialBalancesFromMeta(originalRow2Meta);
+            }
+
+            if (!Array.isArray(newMaterialReceived) || newMaterialReceived.length !== allMaterials.length) {
+                newMaterialReceived = createZeroMaterialBalances();
+            }
+
+            renderStockInputs();
+        }
+
+        function syncOpeningBalancesToMeta() {
+            if (!Array.isArray(originalRow2Meta)) originalRow2Meta = [];
+
+            allMaterials.forEach((mat, index) => {
+                globalHeaders.forEach((header, headerIndex) => {
+                    if (header && String(header).includes(mat)) {
+                        originalRow2Meta[headerIndex] = sanitizeNonNegativeNumber(lastMonthRemaining[index]);
                     }
                 });
             });
+        }
 
+        function applyOpeningBalances() {
+            allMaterials.forEach((mat, index) => {
+                const remainingInput = document.getElementById(getStockInputId('remaining', index));
+                const receivedInput = document.getElementById(getStockInputId('received', index));
+
+                lastMonthRemaining[index] = sanitizeNonNegativeNumber(remainingInput ? remainingInput.value : 0);
+                newMaterialReceived[index] = sanitizeNonNegativeNumber(receivedInput ? receivedInput.value : 0);
+            });
+
+            // Keep the previous-balance row compatible with existing Excel files.
+            syncOpeningBalancesToMeta();
+
+            renderStockInputs();
             calculateLedgerSummary();
             saveProfileData();
-            alert("All opening remaining stock balances applied successfully!");
+
+            alert("All 16 material stock balances applied!");
         }
 
         function applyAttendanceSync() {
@@ -1113,25 +1323,27 @@
                 });
             });
 
-            allMaterials.forEach(mat => {
-                let opening = 0;
-                globalHeaders.forEach((h, idx) => {
-                    if (h.includes(mat)) {
-                        opening = parseFloat(originalRow2Meta[idx]) || 0;
-                    }
-                });
-
-                let consumed = totals[mat];
-                let closing = opening - consumed;
-                if (closing < 0) closing = 0;
+            allMaterials.forEach((mat, index) => {
+                const remaining = sanitizeNonNegativeNumber(lastMonthRemaining[index]);
+                const received = sanitizeNonNegativeNumber(newMaterialReceived[index]);
+                const opening = remaining + received;
+                const consumed = totals[mat];
+                const closing = Math.max(0, opening - consumed);
 
                 let div = document.createElement('div');
-                div.className = "bg-slate-50 border border-slate-200/60 p-3.5 rounded-xl space-y-1";
+                div.className = "bg-slate-50 border border-slate-200/60 p-3.5 rounded-xl space-y-1.5";
+
                 div.innerHTML = `
                     <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block truncate">${mat}</span>
-                    <div class="text-[11px] text-slate-500 flex justify-between"><span>OP: ${opening.toFixed(2)}</span><span>US: ${consumed.toFixed(2)}</span></div>
-                    <div class="text-sm font-bold text-slate-800">CL: ${closing.toFixed(2)}</div>
+                    <div class="text-[11px] text-slate-500 flex justify-between gap-2">
+                        <span>Remaining: ${remaining.toFixed(3)} Kg</span>
+                        <span>Received: ${received.toFixed(3)} Kg</span>
+                    </div>
+                    <div class="text-[11px] text-indigo-600 font-semibold">Opening: ${opening.toFixed(3)} Kg</div>
+                    <div class="text-[11px] text-slate-500">Consumed: ${consumed.toFixed(3)} Kg</div>
+                    <div class="text-sm font-bold text-slate-800">Closing: ${closing.toFixed(3)} Kg</div>
                 `;
+
                 container.appendChild(div);
             });
         }
@@ -1324,7 +1536,7 @@
             document.getElementById('reportLocation').textContent = `तालुका: ${schoolDetails.taluka || '-'} | जिल्हा: ${schoolDetails.district || '-'}`;
             document.getElementById('repMonth').textContent = formatDisplayMonth(selectedRegisterMonth);
             document.getElementById('repDays').textContent = globalRecords.length;
-            
+
             let totalB = 0;
             globalRecords.forEach(r => {
                 globalHeaders.forEach(h => {
@@ -1335,6 +1547,7 @@
 
             let totals = {};
             allMaterials.forEach(m => totals[m] = 0);
+
             globalRecords.forEach(rec => {
                 globalHeaders.forEach(h => {
                     allMaterials.forEach(m => {
@@ -1346,20 +1559,21 @@
             const tbody = document.getElementById('reportLedgerBody');
             tbody.innerHTML = '';
 
-            allMaterials.forEach(mat => {
-                let opening = 0;
-                globalHeaders.forEach((h, idx) => {
-                    if (h.includes(mat)) opening = parseFloat(originalRow2Meta[idx]) || 0;
-                });
-                let consumed = totals[mat];
-                let closing = Math.max(0, opening - consumed);
+            allMaterials.forEach((mat, index) => {
+                const remaining = sanitizeNonNegativeNumber(lastMonthRemaining[index]);
+                const received = sanitizeNonNegativeNumber(newMaterialReceived[index]);
+                const opening = remaining + received;
+                const consumed = totals[mat];
+                const closing = Math.max(0, opening - consumed);
 
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="p-2.5 border-r border-slate-200 font-medium text-slate-700">${mat}</td>
-                    <td class="p-2.5 border-r border-slate-200 text-slate-600">${opening.toFixed(2)}</td>
-                    <td class="p-2.5 border-r border-slate-200 text-slate-600">${consumed.toFixed(2)}</td>
-                    <td class="p-2.5 font-bold text-slate-900">${closing.toFixed(2)}</td>
+                    <td class="p-2.5 border-r border-slate-200 text-slate-600">${remaining.toFixed(3)} Kg</td>
+                    <td class="p-2.5 border-r border-slate-200 text-slate-600">${received.toFixed(3)} Kg</td>
+                    <td class="p-2.5 border-r border-slate-200 font-semibold text-indigo-700">${opening.toFixed(3)} Kg</td>
+                    <td class="p-2.5 border-r border-slate-200 text-slate-600">${consumed.toFixed(3)} Kg</td>
+                    <td class="p-2.5 font-bold text-slate-900">${closing.toFixed(3)} Kg</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1377,13 +1591,63 @@
                 return;
             }
 
+            // Ensure current UI values are included before exporting.
+            allMaterials.forEach((mat, index) => {
+                const remainingInput = document.getElementById(getStockInputId('remaining', index));
+                const receivedInput = document.getElementById(getStockInputId('received', index));
+
+                lastMonthRemaining[index] = sanitizeNonNegativeNumber(remainingInput ? remainingInput.value : lastMonthRemaining[index]);
+                newMaterialReceived[index] = sanitizeNonNegativeNumber(receivedInput ? receivedInput.value : newMaterialReceived[index]);
+            });
+
+            syncOpeningBalancesToMeta();
+
             let exportData = [];
             let row0 = [...originalRow0Meta];
             if (schoolDetails.name) row0[0] = schoolDetails.name;
             row0[5] = formatDisplayMonth(selectedRegisterMonth);
+
             exportData.push(row0);
             exportData.push(globalHeaders);
-            exportData.push(originalRow2Meta); 
+
+            // Row 2: last month's remaining stock
+            let remainingRow = [...originalRow2Meta];
+            remainingRow[4] = "मागील शिल्लक";
+            allMaterials.forEach((mat, index) => {
+                globalHeaders.forEach((header, headerIndex) => {
+                    if (header && String(header).includes(mat)) {
+                        remainingRow[headerIndex] = lastMonthRemaining[index];
+                    }
+                });
+            });
+            exportData.push(remainingRow);
+
+            // Row 3: new material received
+            let receivedRow = new Array(globalHeaders.length).fill("");
+            receivedRow[4] = "नवीन प्राप्त";
+            allMaterials.forEach((mat, index) => {
+                globalHeaders.forEach((header, headerIndex) => {
+                    if (header && String(header).includes(mat)) {
+                        receivedRow[headerIndex] = newMaterialReceived[index];
+                    }
+                });
+            });
+            exportData.push(receivedRow);
+
+            // Row 4: calculated opening stock
+            let openingRow = new Array(globalHeaders.length).fill("");
+            openingRow[4] = "एकूण प्रारंभिक शिल्लक (Opening Stock)";
+            allMaterials.forEach((mat, index) => {
+                const opening = sanitizeNonNegativeNumber(lastMonthRemaining[index]) +
+                                sanitizeNonNegativeNumber(newMaterialReceived[index]);
+
+                globalHeaders.forEach((header, headerIndex) => {
+                    if (header && String(header).includes(mat)) {
+                        openingRow[headerIndex] = opening;
+                    }
+                });
+            });
+            exportData.push(openingRow);
 
             globalRecords.forEach(record => {
                 let rowArr = globalHeaders.map(header => record[header] !== undefined ? record[header] : "");
@@ -1402,6 +1666,8 @@
             document.getElementById('uploadStep').classList.remove('hidden');
             globalHeaders = [];
             globalRecords = [];
+            lastMonthRemaining = createZeroMaterialBalances();
+            newMaterialReceived = createZeroMaterialBalances();
             exceptionDates = [];
             localStorage.removeItem("pmposhan_profile_" + currentProfile);
             loadProfileData();
