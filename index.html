@@ -2,7 +2,7 @@
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
     <title>Smart Desk - PM Poshan Portal</title>
     <!-- Website Favicon / Logo for Browser Tab -->
     <link rel="icon" type="image/png" href="logo.png">
@@ -22,8 +22,336 @@
             #printReportModal { position: absolute; left: 0; top: 0; width: 100%; background: white !important; }
         }
     </style>
+
+<style id="smartdesk-mobile-optimization">
+/* =========================================================
+   SMART DESK — MOBILE FIRST SAFETY / USABILITY LAYER
+   ========================================================= */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+}
+body {
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+    -webkit-tap-highlight-color: transparent;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+button, input, select, textarea {
+    font: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+}
+button {
+    touch-action: manipulation;
+    min-height: 44px;
+}
+input, select, textarea {
+    min-height: 44px;
+    font-size: 16px !important; /* prevents iOS/Android zoom on focus */
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Prevent accidental horizontal page scrolling. */
+.overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}
+
+/* Better touch targets and card spacing. */
+@media (max-width: 767px) {
+    .mobile-stack {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    /* Main content breathing room */
+    main, .max-w-7xl, .max-w-6xl, .max-w-5xl {
+        max-width: 100% !important;
+    }
+
+    /* Header/nav becomes horizontally scrollable instead of wrapping badly. */
+    nav {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        white-space: nowrap;
+        overscroll-behavior-x: contain;
+    }
+    nav::-webkit-scrollbar { display: none; }
+
+    nav button {
+        flex: 0 0 auto !important;
+        min-height: 46px;
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    /* Make large desktop padding compact on phones. */
+    .p-8 { padding: 1rem !important; }
+    .p-7 { padding: 1rem !important; }
+    .p-6 { padding: 1rem !important; }
+    .px-8 { padding-left: 1rem !important; padding-right: 1rem !important; }
+    .py-8 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+
+    /* Cards */
+    .rounded-2xl { border-radius: 1rem !important; }
+
+    /* Buttons in action areas: don't create tiny tap targets. */
+    button, .btn, [role="button"] {
+        min-height: 44px;
+    }
+
+    /* Inputs should be comfortable to use with thumbs. */
+    input, select, textarea {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Stock grids: 1/2 columns depending on available width. */
+    .stock-mobile-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem !important;
+    }
+
+    /* Daily table stays usable: horizontal swipe, not page overflow. */
+    #tablePreview,
+    #tableContainer,
+    .table-scroll,
+    .overflow-x-auto {
+        max-width: 100%;
+        overflow-x: auto !important;
+        scrollbar-width: thin;
+    }
+
+    table {
+        min-width: max-content;
+    }
+
+    th, td {
+        white-space: nowrap;
+    }
+
+    /* Keep editable cells easy to hit. */
+    td [contenteditable="true"],
+    [contenteditable="true"] {
+        min-height: 44px;
+        padding-top: .75rem !important;
+        padding-bottom: .75rem !important;
+    }
+
+    /* Avoid hover-only interaction on touch devices. */
+    .hover\:shadow-sm:hover,
+    .hover\:shadow-md:hover {
+        box-shadow: none !important;
+    }
+
+    /* File manager cards stack their actions cleanly. */
+    #savedRegistersGrid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    /* Fixed/absolute UI should respect phone safe areas. */
+    .fixed {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Make modal/dialog content fit short phone screens. */
+    .modal-content,
+    [role="dialog"] > div {
+        max-height: calc(100dvh - 24px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Utility/action button groups don't overflow. */
+    .grid {
+        min-width: 0;
+    }
+    .grid > * {
+        min-width: 0;
+    }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+    nav button {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        font-size: 11px !important;
+    }
+
+    .stock-mobile-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .text-4xl { font-size: 2rem !important; }
+}
+
+/* Landscape phones */
+@media (max-height: 520px) and (orientation: landscape) {
+    nav button { min-height: 40px; }
+    input, select, textarea, button { min-height: 40px; }
+}
+</style>
+
+
+<link rel="manifest" href="smartdesk-manifest.json">
+<meta name="theme-color" content="#4f46e5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Smart Desk">
+
+
+<style id="smartdesk-major-update-css">
+html { -webkit-text-size-adjust:100%; text-size-adjust:100%; scroll-behavior:smooth; }
+body { min-width:0 !important; overflow-x:hidden !important; -webkit-tap-highlight-color:transparent; padding-bottom:env(safe-area-inset-bottom); }
+button,input,select,textarea { font:inherit; }
+button { touch-action:manipulation; min-height:44px; }
+input,select,textarea { min-height:44px; font-size:16px !important; box-sizing:border-box; }
+input[type=number] { -moz-appearance:textfield; }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+
+#smartDeskDashboard {
+  display:none;
+}
+#smartDeskDashboard .sd-action-card {
+  min-height:104px; border:1px solid #e2e8f0; border-radius:18px;
+  background:#fff; padding:16px; text-align:left;
+  box-shadow:0 2px 10px rgba(15,23,42,.04);
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+#smartDeskDashboard .sd-action-card:active { transform:scale(.98); }
+#smartDeskDashboard .sd-primary {
+  border-color:#6366f1; background:linear-gradient(135deg,#eef2ff,#fff);
+}
+.sd-saved-pill {
+  display:inline-flex; align-items:center; gap:6px; padding:5px 10px;
+  border-radius:999px; font-size:11px; font-weight:700;
+}
+.sd-saved { color:#047857; background:#ecfdf5; }
+.sd-saving { color:#b45309; background:#fffbeb; }
+.sd-unsaved { color:#b91c1c; background:#fef2f2; }
+
+#sdToast {
+  position:fixed; left:50%; bottom:calc(76px + env(safe-area-inset-bottom));
+  transform:translateX(-50%) translateY(15px); opacity:0; pointer-events:none;
+  z-index:100; transition:.2s ease; max-width:92vw;
+}
+#sdToast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+.sd-tooltip {
+  position:absolute; z-index:90; max-width:260px; padding:10px 12px;
+  background:#0f172a; color:#fff; border-radius:10px; font-size:12px;
+  line-height:1.45; box-shadow:0 8px 30px rgba(0,0,0,.18);
+}
+.sd-help { cursor:help; color:#6366f1; font-weight:800; }
+
+@media(max-width:767px) {
+  nav { overflow-x:auto !important; scrollbar-width:none; -webkit-overflow-scrolling:touch; white-space:nowrap; }
+  nav::-webkit-scrollbar { display:none; }
+  nav button { flex:0 0 auto !important; min-height:46px; }
+  table { min-width:max-content; }
+  th,td { white-space:nowrap; }
+  .overflow-x-auto { -webkit-overflow-scrolling:touch; }
+  #smartDeskDashboard { padding-bottom:100px; }
+  #smartDeskDashboard .sd-action-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:380px) {
+  #smartDeskDashboard .sd-action-grid { grid-template-columns:1fr; }
+}
+</style>
+
 </head>
-<body class="h-full bg-slate-50 text-slate-900 antialiased selection:bg-indigo-500 selection:text-white flex flex-col justify-between">
+<body class="smartdesk-app" class="h-full bg-slate-50 text-slate-900 antialiased selection:bg-indigo-500 selection:text-white flex flex-col justify-between">
+
+<!-- SMART DESK MAJOR UPDATE: HOME DASHBOARD -->
+<section id="smartDeskDashboard" class="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+  <div class="flex items-center justify-between gap-3 mb-5">
+    <div>
+      <p class="text-xs font-semibold text-indigo-600 uppercase tracking-wider">Smart Desk</p>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">👋 Welcome back</h1>
+      <p id="sdDashboardProfile" class="text-sm text-slate-500 mt-1">Your school profile</p>
+    </div>
+    <span id="sdDashboardSave" class="sd-saved-pill sd-saved">🟢 Saved</span>
+  </div>
+
+  <button class="sd-action-card sd-primary w-full mb-4" onclick="sdContinueRegister()">
+    <div class="text-2xl">📝</div>
+    <div class="mt-1 font-extrabold text-slate-900">Continue Register</div>
+    <div id="sdContinueSub" class="text-xs text-slate-500 mt-1">Open your current register</div>
+  </button>
+
+  <div class="sd-action-grid grid grid-cols-2 gap-3">
+    <button class="sd-action-card" onclick="sdNewRegister()">
+      <div class="text-2xl">🆕</div>
+      <div class="mt-1 font-bold text-slate-900">New Register</div>
+      <div class="text-xs text-slate-500 mt-1">Start a new month</div>
+    </button>
+
+    <button class="sd-action-card" onclick="sdOpenFiles()">
+      <div class="text-2xl">📂</div>
+      <div class="mt-1 font-bold text-slate-900">My Registers</div>
+      <div class="text-xs text-slate-500 mt-1">Edit, Excel or Print</div>
+    </button>
+
+    <button class="sd-action-card" onclick="sdImportExcel()">
+      <div class="text-2xl">📥</div>
+      <div class="mt-1 font-bold text-slate-900">Import Excel</div>
+      <div class="text-xs text-slate-500 mt-1">Bring an existing file</div>
+    </button>
+
+    <button class="sd-action-card" onclick="openRecoveryPanel()">
+      <div class="text-2xl">🛟</div>
+      <div class="mt-1 font-bold text-slate-900">Recovery</div>
+      <div class="text-xs text-slate-500 mt-1">Protect your data</div>
+    </button>
+  </div>
+
+  <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="font-bold text-slate-900">⚡ Quick Daily Entry</div>
+        <div class="text-xs text-slate-500 mt-1">Jump directly to today's entry</div>
+      </div>
+      <button onclick="sdQuickDailyEntry()" class="rounded-xl bg-indigo-600 text-white px-4 font-bold text-sm">Open</button>
+    </div>
+  </div>
+</section>
+
+<div id="sdToast"><div class="rounded-xl bg-slate-900 text-white px-4 py-3 text-sm font-semibold shadow-xl"></div></div>
+
+<!-- More menu -->
+<div id="sdMorePanel" class="hidden fixed inset-0 z-[75] bg-slate-950/50 backdrop-blur-sm p-4">
+  <div class="max-w-sm mx-auto mt-auto sm:mt-24 bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <div class="p-4 border-b flex items-center justify-between">
+      <b>⋮ More</b>
+      <button onclick="sdCloseMore()" class="w-10 h-10 rounded-xl bg-slate-100">×</button>
+    </div>
+    <div class="p-3 grid gap-2">
+      <button onclick="openRecoveryPanel();sdCloseMore()" class="p-3 rounded-xl bg-amber-50 text-left font-semibold">🛟 Recovery</button>
+      <button onclick="sdUndo();sdCloseMore()" class="p-3 rounded-xl bg-violet-50 text-left font-semibold">↩️ Undo</button>
+<button onclick="sdRedo();sdCloseMore()" class="p-3 rounded-xl bg-violet-50 text-left font-semibold">↪️ Redo</button>
+<button onclick="sdShowHelp();sdCloseMore()" class="p-3 rounded-xl bg-indigo-50 text-left font-semibold">💡 Help</button>
+      <button onclick="sdInstallPWA();sdCloseMore()" class="p-3 rounded-xl bg-emerald-50 text-left font-semibold">📱 Install Smart Desk</button>
+      <button onclick="sdShowOfflineInfo();sdCloseMore()" class="p-3 rounded-xl bg-slate-50 text-left font-semibold">📶 Offline Mode</button>
+    </div>
+  </div>
+</div>
+
+
 
     <!-- INITIAL LOGIN & PROFILE SELECTOR GATE -->
     <div id="loginPage" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
@@ -97,6 +425,7 @@
                         <select id="userProfileSelector" onchange="switchUserProfile()" class="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"></select>
                         <button onclick="openProfileModal()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 w-5 h-5 rounded flex items-center justify-center font-bold ml-1 transition">+</button>
                     </div>
+                    <button onclick="openRecoveryPanel()" class="text-xs font-medium bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg transition">🛟 Recovery</button>
                     <button onclick="logoutToGate()" class="text-xs font-medium bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-lg transition">Exit</button>
                     <span id="schoolBadge" class="hidden md:inline-block text-xs font-medium bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg truncate max-w-xs">No School Loaded</span>
                 </div>
@@ -107,7 +436,8 @@
         <nav class="bg-white border-b border-slate-200 shadow-xs">
             <div class="max-w-7xl mx-auto px-6 flex gap-8">
                 <button onclick="switchTab('hub')" id="btn-hub" class="py-3 font-semibold text-xs text-slate-400 border-b-2 border-transparent hover:text-slate-700 transition">Portal Hub</button>
-                <button onclick="switchTab('excel')" id="btn-excel" class="py-3 font-semibold text-xs text-indigo-600 border-b-2 border-indigo-600 transition">PM Poshan Menu</button>
+                <button onclick="switchTab('excel')" id="btn-excel" class="py-3 font-semibold text-xs text-indigo-600 border-b-2 border-indigo-600 transition">PM Poshan Register</button>
+                <button onclick="switchTab('files')" id="btn-files" class="py-3 font-semibold text-xs text-slate-400 border-b-2 border-transparent hover:text-slate-700 transition">📂 My Registers</button>
                 <button onclick="switchTab('tools')" id="btn-tools" class="py-3 font-semibold text-xs text-slate-400 border-b-2 border-transparent hover:text-slate-700 transition">Utilities</button>
             </div>
         </nav>
@@ -243,17 +573,20 @@
                             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Students Served</span>
                             <span id="statTotalStudents" class="text-lg font-bold text-indigo-600">0 Total</span>
                         </div>
-                        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-2">
-                            <button onclick="downloadFilledExcel()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 px-3 text-xs rounded-xl transition flex items-center justify-center shadow-sm">
-                                <span>Excel</span>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs grid grid-cols-3 gap-2">
+                            <button onclick="saveCurrentRegisterToFileManager(false)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-2 text-xs rounded-xl transition flex items-center justify-center gap-1 shadow-sm">
+                                <span>💾</span><span>Save</span>
                             </button>
-                            <button onclick="openPrintReport()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 px-3 text-xs rounded-xl transition flex items-center justify-center">
-                                <span>Report</span>
+                            <button onclick="saveRegisterAndDownload()" class="bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 px-2 text-xs rounded-xl transition flex items-center justify-center gap-1 shadow-sm">
+                                <span>📊</span><span>Excel</span>
+                            </button>
+                            <button onclick="openPrintReport()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 px-2 text-xs rounded-xl transition flex items-center justify-center gap-1">
+                                <span>🖨️</span><span>Report</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Opening Stock / Previous Remaining + New Receipt Card -->
+                    <!-- Opening Stock <span class="sd-help" data-help="Opening Stock = Last Month Remaining Stock + New Material Received.">ⓘ</span> / Previous Remaining + New Receipt Card -->
                     <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
                             <div>
@@ -457,7 +790,58 @@
 
             </div>
 
-            <!-- TAB 3: Utilities -->
+ 
+           <!-- TAB 3: My Registers / File Manager -->
+           <div id="tab-files" class="space-y-6 hidden">
+               <div class="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+                   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+                       <div>
+                           <h2 class="text-sm font-bold tracking-wider uppercase text-indigo-600">📂 My Registers</h2>
+                           <p class="text-xs text-slate-500 mt-1">
+                               Save, reopen, re-edit and download your PM Poshan registers anytime on this device.
+                           </p>
+                       </div>
+                       <div class="flex gap-2">
+                           <button onclick="switchTab('excel')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition">
+                               ➕ New / Import
+                           </button>
+                           <button onclick="renderSavedRegisters()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold transition">
+                               ↻ Refresh
+                           </button>
+                       </div>
+                   </div>
+
+                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                       <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl">
+                           <div class="text-xl">✏️</div>
+                           <div class="text-xs font-bold text-indigo-800 mt-2">Re-edit</div>
+                           <div class="text-[11px] text-indigo-700/70 mt-1">Open a saved register and edit daily entries, stock and menus.</div>
+                       </div>
+                       <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-xl">
+                           <div class="text-xl">💾</div>
+                           <div class="text-xs font-bold text-emerald-800 mt-2">Save Changes</div>
+                           <div class="text-[11px] text-emerald-700/70 mt-1">Keep your latest working version stored locally.</div>
+                       </div>
+                       <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
+                           <div class="text-xl">📊</div>
+                           <div class="text-xs font-bold text-slate-800 mt-2">Save / Download Excel</div>
+                           <div class="text-[11px] text-slate-500 mt-1">Generate a fresh Excel file from the latest saved version.</div>
+                       </div>
+                   </div>
+
+                   <div id="fileManagerSaveNotice" class="hidden text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-4 py-3 rounded-xl"></div>
+
+                   <div id="savedRegistersEmpty" class="text-center py-12 bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
+                       <div class="text-4xl">📂</div>
+                       <h3 class="text-sm font-bold text-slate-700 mt-3">No saved registers yet</h3>
+                       <p class="text-xs text-slate-500 mt-1">Import an existing Excel file or generate a new register to get started.</p>
+                   </div>
+
+                   <div id="savedRegistersGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+               </div>
+           </div>
+
+           <!-- TAB 3: Utilities -->
             <div id="tab-tools" class="space-y-6 hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
@@ -592,6 +976,8 @@
         let originalRow2Meta = [];
         let lastMonthRemaining = [];
         let newMaterialReceived = [];
+        let savedRegisters = [];
+        let currentRegisterId = "";
         let exceptionDates = [];
 
         const allMaterials = [
@@ -629,6 +1015,8 @@
         }
 
         function updateLoginGate() {
+            if (window.hidePostProfileQuickActions) window.hidePostProfileQuickActions();
+
             let profiles = getSavedProfiles();
             const existingSec = document.getElementById('existingUserSection');
             const setupSec = document.getElementById('setupProfileSection');
@@ -713,6 +1101,10 @@
         }
 
         function enterMainDesk() {
+            if (window.sdShowDashboard) window.sdShowDashboard();
+
+            if (window.showPostProfileQuickActions) window.showPostProfileQuickActions();
+
             let profiles = getSavedProfiles();
             if (profiles.length > 0 && document.getElementById('existingUserSection').classList.contains('hidden') === false) {
                 currentProfile = document.getElementById('loginProfileSelector').value;
@@ -723,18 +1115,24 @@
         }
 
         function logoutToGate() {
+            if (window.sdHideDashboard) window.sdHideDashboard();
+
+            if (window.hidePostProfileQuickActions) window.hidePostProfileQuickActions();
+
             updateLoginGate();
+        renderSavedRegisters();
             document.getElementById('mainDeskContainer').classList.add('hidden');
             document.getElementById('loginPage').classList.remove('hidden');
         }
 
         function switchTab(tabName) {
-            ['hub', 'excel', 'tools'].forEach(t => {
+            ['hub', 'excel', 'files', 'tools'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
                 document.getElementById(`btn-${t}`).className = "py-3 font-semibold text-xs text-slate-400 border-b-2 border-transparent hover:text-slate-700 transition";
             });
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
             document.getElementById(`btn-${tabName}`).className = "py-3 font-semibold text-xs text-indigo-600 border-b-2 border-indigo-600 transition";
+            if (tabName === 'files') renderSavedRegisters();
         }
 
         function switchUserProfile() {
@@ -783,6 +1181,7 @@
             closeProfileModal();
             loadProfileData();
             updateLoginGate();
+            renderSavedRegisters();
         }
 
         function onMonthChanged() {
@@ -811,6 +1210,267 @@
             return `${moNames[moIdx] || 'Jun'}-${yr}`;
         }
 
+
+        function cloneRegisterState() {
+            return {
+                menuPresets: JSON.parse(JSON.stringify(menuPresets)),
+                globalHeaders: JSON.parse(JSON.stringify(globalHeaders)),
+                globalRecords: JSON.parse(JSON.stringify(globalRecords)),
+                originalRow0Meta: JSON.parse(JSON.stringify(originalRow0Meta)),
+                originalRow2Meta: JSON.parse(JSON.stringify(originalRow2Meta)),
+                lastMonthRemaining: JSON.parse(JSON.stringify(lastMonthRemaining)),
+                newMaterialReceived: JSON.parse(JSON.stringify(newMaterialReceived)),
+                exceptionDates: JSON.parse(JSON.stringify(exceptionDates)),
+                schoolDetails: JSON.parse(JSON.stringify(schoolDetails)),
+                originalFileName: originalFileName,
+                selectedRegisterMonth: selectedRegisterMonth
+            };
+        }
+
+        function getSavedRegistersForCurrentProfile() {
+            return Array.isArray(savedRegisters) ? savedRegisters : [];
+        }
+
+        function saveCurrentRegisterToFileManager(downloadExcel = false) {
+            if (!globalHeaders.length) {
+                alert("Please import or generate a PM Poshan register first.");
+                return;
+            }
+
+            // Pull the latest stock values from the visible inputs.
+            allMaterials.forEach((mat, index) => {
+                const remainingInput = document.getElementById(getStockInputId('remaining', index));
+                const receivedInput = document.getElementById(getStockInputId('received', index));
+
+                if (remainingInput) {
+                    lastMonthRemaining[index] = sanitizeNonNegativeNumber(remainingInput.value);
+                }
+                if (receivedInput) {
+                    newMaterialReceived[index] = sanitizeNonNegativeNumber(receivedInput.value);
+                }
+            });
+
+            syncOpeningBalancesToMeta();
+
+            if (!currentRegisterId) {
+                currentRegisterId = "REG_" + Date.now();
+            }
+
+            const state = cloneRegisterState();
+            const existingIndex = savedRegisters.findIndex(r => r.id === currentRegisterId);
+
+            const snapshot = {
+                id: currentRegisterId,
+                fileName: originalFileName || `PM_Poshan_${formatDisplayMonth(selectedRegisterMonth)}.xlsx`,
+                month: selectedRegisterMonth,
+                schoolName: schoolDetails.name || "Z.P. School",
+                taluka: schoolDetails.taluka || "-",
+                district: schoolDetails.district || "-",
+                recordCount: globalRecords.length,
+                updatedAt: new Date().toISOString(),
+                state: state
+            };
+
+            if (existingIndex >= 0) {
+                savedRegisters[existingIndex] = snapshot;
+            } else {
+                savedRegisters.unshift(snapshot);
+            }
+
+            // Keep the local file manager practical and prevent unlimited localStorage growth.
+            savedRegisters = savedRegisters.slice(0, 30);
+
+            saveProfileData();
+            renderSavedRegisters();
+
+            if (downloadExcel) {
+                downloadFilledExcel(true);
+            }
+
+            const saveNotice = document.getElementById('fileManagerSaveNotice');
+            if (saveNotice) {
+                saveNotice.textContent = `Saved: ${snapshot.fileName}`;
+                saveNotice.classList.remove('hidden');
+                setTimeout(() => saveNotice.classList.add('hidden'), 2500);
+            }
+
+            return snapshot.id;
+        }
+
+        function openSavedRegister(registerId) {
+            const saved = savedRegisters.find(r => r.id === registerId);
+            if (!saved || !saved.state) {
+                alert("Saved register could not be found.");
+                return;
+            }
+
+            const state = saved.state;
+
+            currentRegisterId = saved.id;
+            menuPresets = state.menuPresets || JSON.parse(JSON.stringify(defaultMenuPresets));
+            globalHeaders = state.globalHeaders || [];
+            globalRecords = state.globalRecords || [];
+            originalRow0Meta = state.originalRow0Meta || [];
+            originalRow2Meta = state.originalRow2Meta || [];
+            lastMonthRemaining = Array.isArray(state.lastMonthRemaining)
+                ? state.lastMonthRemaining
+                : createZeroMaterialBalances();
+            newMaterialReceived = Array.isArray(state.newMaterialReceived)
+                ? state.newMaterialReceived
+                : createZeroMaterialBalances();
+            exceptionDates = Array.isArray(state.exceptionDates) ? state.exceptionDates : [];
+            schoolDetails = state.schoolDetails || { name: "", taluka: "", district: "" };
+            originalFileName = state.originalFileName || saved.fileName || "pm_poshan_filled.xlsx";
+            selectedRegisterMonth = state.selectedRegisterMonth || saved.month || "2026-06";
+
+            document.getElementById('globalMonthSelector').value = selectedRegisterMonth;
+            document.getElementById('activeMonthDisplay').textContent = formatDisplayMonth(selectedRegisterMonth);
+            document.getElementById('fileNameDisplay').textContent = originalFileName;
+
+            document.getElementById('uploadStep').classList.add('hidden');
+            document.getElementById('formStep').classList.remove('hidden');
+
+            const badge = document.getElementById('schoolBadge');
+            if (badge) {
+                badge.textContent = `${schoolDetails.name || "Z.P. School"} (Tal: ${schoolDetails.taluka || '-'}, Dist: ${schoolDetails.district || '-'})`;
+            }
+
+            rebuildMenuSelector();
+            renderMaterialInputs();
+            populateStockInputs();
+            renderTablePreview();
+            updateStats();
+            calculateLedgerSummary();
+            renderExceptions();
+            saveProfileData();
+
+            switchTab('excel');
+        }
+
+        function deleteSavedRegister(registerId) {
+            const saved = savedRegisters.find(r => r.id === registerId);
+            if (!saved) return;
+
+            if (!confirm(`Delete "${saved.fileName}" from My Registers?`)) return;
+
+            savedRegisters = savedRegisters.filter(r => r.id !== registerId);
+
+            if (currentRegisterId === registerId) {
+                currentRegisterId = "";
+            }
+
+            saveProfileData();
+            renderSavedRegisters();
+        }
+
+        function formatSavedRegisterDate(iso) {
+            if (!iso) return "-";
+            const d = new Date(iso);
+            if (isNaN(d)) return "-";
+            return d.toLocaleString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function renderSavedRegisters() {
+            const grid = document.getElementById('savedRegistersGrid');
+            const empty = document.getElementById('savedRegistersEmpty');
+            const notice = document.getElementById('fileManagerSaveNotice');
+
+            if (!grid || !empty) return;
+
+            if (notice) {
+                // Keep existing save notice state; don't clear it here.
+            }
+
+            grid.innerHTML = '';
+
+            const registers = getSavedRegistersForCurrentProfile();
+
+            if (!registers.length) {
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+
+            registers.forEach(reg => {
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-sm transition";
+
+                const isCurrent = reg.id === currentRegisterId;
+                const currentBadge = isCurrent
+                    ? `<span class="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2 py-1 rounded-full">CURRENT</span>`
+                    : "";
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3 min-w-0">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0">📄</div>
+                            <div class="min-w-0">
+                                <h3 class="text-sm font-bold text-slate-800 truncate" title="${escapeHtml(reg.fileName)}">${escapeHtml(reg.fileName)}</h3>
+                                <p class="text-[11px] text-slate-500 mt-1">
+                                    ${escapeHtml(reg.schoolName || "Z.P. School")} • ${escapeHtml(formatDisplayMonth(reg.month))}
+                                </p>
+                            </div>
+                        </div>
+                        ${currentBadge}
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 mt-4">
+                        <div class="bg-slate-50 rounded-lg p-2">
+                            <span class="block text-[10px] text-slate-400 uppercase">Days</span>
+                            <strong class="text-xs text-slate-700">${Number(reg.recordCount || 0)}</strong>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-2">
+                            <span class="block text-[10px] text-slate-400 uppercase">Month</span>
+                            <strong class="text-xs text-slate-700">${escapeHtml(formatDisplayMonth(reg.month))}</strong>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-2">
+                            <span class="block text-[10px] text-slate-400 uppercase">Edited</span>
+                            <strong class="text-[10px] text-slate-700">${escapeHtml(formatSavedRegisterDate(reg.updatedAt))}</strong>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <button onclick="openSavedRegister('${reg.id}')" class="flex-1 min-w-[100px] bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition">✏️ Re-edit</button>
+                        <button onclick="downloadSavedRegisterExcel('${reg.id}')" class="flex-1 min-w-[100px] bg-slate-900 hover:bg-slate-800 text-white px-3 py-2 rounded-lg text-xs font-semibold transition">📥 Excel</button>
+                        <button onclick="deleteSavedRegister('${reg.id}')" class="px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold transition">🗑️</button>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function downloadSavedRegisterExcel(registerId) {
+            const saved = savedRegisters.find(r => r.id === registerId);
+            if (!saved) {
+                alert("Saved register could not be found.");
+                return;
+            }
+
+            openSavedRegister(registerId);
+            setTimeout(() => downloadFilledExcel(true), 0);
+        }
+
+        function saveRegisterAndDownload() {
+            saveCurrentRegisterToFileManager(true);
+        }
+
         function saveProfileData() {
             let profileState = {
                 menuPresets: menuPresets,
@@ -820,6 +1480,9 @@
                 originalRow2Meta: originalRow2Meta,
                 lastMonthRemaining: lastMonthRemaining,
                 newMaterialReceived: newMaterialReceived,
+                exceptionDates: exceptionDates,
+                savedRegisters: savedRegisters,
+                currentRegisterId: currentRegisterId,
                 schoolDetails: schoolDetails,
                 originalFileName: originalFileName,
                 selectedRegisterMonth: selectedRegisterMonth
@@ -844,6 +1507,9 @@
                     newMaterialReceived = Array.isArray(state.newMaterialReceived)
                         ? state.newMaterialReceived
                         : createZeroMaterialBalances();
+                    exceptionDates = Array.isArray(state.exceptionDates) ? state.exceptionDates : [];
+                    savedRegisters = Array.isArray(state.savedRegisters) ? state.savedRegisters : [];
+                    currentRegisterId = state.currentRegisterId || "";
                     schoolDetails = state.schoolDetails || { name: "", taluka: "", district: "" };
                     originalFileName = state.originalFileName || "pm_poshan_filled.xlsx";
                     selectedRegisterMonth = state.selectedRegisterMonth || "2026-06";
@@ -875,6 +1541,7 @@
                         updateStats();
                         calculateLedgerSummary();
                         updateLoginGate();
+                        renderSavedRegisters();
                         return;
                     }
                 } catch(e) {}
@@ -887,6 +1554,8 @@
             originalRow2Meta = [];
             lastMonthRemaining = createZeroMaterialBalances();
             newMaterialReceived = createZeroMaterialBalances();
+            savedRegisters = [];
+            currentRegisterId = "";
             originalFileName = "pm_poshan_filled.xlsx";
             selectedRegisterMonth = "2026-06";
             document.getElementById('globalMonthSelector').value = selectedRegisterMonth;
@@ -923,6 +1592,7 @@
             }
 
             originalFileName = `PM_Poshan_${formatDisplayMonth(selectedRegisterMonth)}.xlsx`;
+            currentRegisterId = "REG_" + Date.now();
             document.getElementById('fileNameDisplay').textContent = originalFileName;
 
             originalRow0Meta = [schoolDetails.name, "", "", "", "", formatDisplayMonth(selectedRegisterMonth), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -938,6 +1608,7 @@
             updateStats();
             calculateLedgerSummary();
             saveProfileData();
+            saveCurrentRegisterToFileManager(false);
 
             document.getElementById('uploadStep').classList.add('hidden');
             document.getElementById('formStep').classList.remove('hidden');
@@ -957,6 +1628,7 @@
             if (!file) return;
 
             originalFileName = file.name;
+            currentRegisterId = "REG_" + Date.now();
             document.getElementById('fileNameDisplay').textContent = originalFileName;
 
             const reader = new FileReader();
@@ -1024,10 +1696,23 @@
 
                 populateStockInputs();
                 renderMaterialInputs();
-                globalRecords = [];
+
+                // Reconstruct existing daily records so imported Excel files are truly re-editable.
+                globalRecords = parseImportedDailyRecords(rawSheetData, globalHeaders);
+
+                const importedDateHeaderIndex = globalHeaders.findIndex(h => String(h).includes('दिनांक'));
+                if (globalRecords.length > 0 && importedDateHeaderIndex >= 0) {
+                    const firstImportedDate = normalizeImportedDate(globalRecords[0][globalHeaders[importedDateHeaderIndex]]);
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(firstImportedDate)) {
+                        selectedRegisterMonth = firstImportedDate.slice(0, 7);
+                    }
+                }
+
                 renderTablePreview();
+                updateStats();
                 calculateLedgerSummary();
                 saveProfileData();
+                saveCurrentRegisterToFileManager(false);
                 document.getElementById('uploadStep').classList.add('hidden');
                 document.getElementById('formStep').classList.remove('hidden');
                 
@@ -1040,6 +1725,109 @@
                 previewConsumption();
             };
             reader.readAsArrayBuffer(file);
+        }
+
+
+        function excelSerialToDateString(value) {
+            const n = Number(value);
+            if (!isFinite(n) || n < 1) return "";
+            const utcDays = Math.floor(n - 25569);
+            const date = new Date(utcDays * 86400 * 1000);
+            if (isNaN(date)) return "";
+            return date.toISOString().slice(0, 10);
+        }
+
+        function normalizeImportedDate(value) {
+            if (value instanceof Date && !isNaN(value)) {
+                const yyyy = value.getFullYear();
+                const mm = String(value.getMonth() + 1).padStart(2, '0');
+                const dd = String(value.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
+
+            const text = String(value ?? "").trim();
+
+            if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(text)) {
+                const parts = text.split('-');
+                return `${parts[0]}-${String(parts[1]).padStart(2, '0')}-${String(parts[2]).padStart(2, '0')}`;
+            }
+
+            if (/^\d{1,2}[\/.-]\d{1,2}[\/.-]\d{4}$/.test(text)) {
+                const parts = text.split(/[\/.-]/).map(Number);
+                return `${parts[2]}-${String(parts[1]).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
+            }
+
+            const excelDate = excelSerialToDateString(value);
+            return excelDate || text;
+        }
+
+        function parseImportedDailyRecords(sheetData, headers) {
+            if (!Array.isArray(sheetData) || !headers.length) return [];
+
+            const dateIndex = headers.findIndex(h => String(h).includes('दिनांक'));
+            const menuIndex = headers.findIndex(h => String(h).includes('मेनू'));
+
+            if (dateIndex < 0) return [];
+
+            // Find the first row that looks like a real daily record.
+            // This skips metadata + remaining + received + opening rows.
+            let startIndex = -1;
+
+            for (let i = 2; i < sheetData.length; i++) {
+                const row = sheetData[i] || [];
+                const rawDate = row[dateIndex];
+
+                if (!rawDate) continue;
+
+                const normalized = normalizeImportedDate(rawDate);
+                if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+                    startIndex = i;
+                    break;
+                }
+            }
+
+            if (startIndex < 0) return [];
+
+            const records = [];
+
+            for (let i = startIndex; i < sheetData.length; i++) {
+                const row = sheetData[i] || [];
+                const rawDate = row[dateIndex];
+
+                if (rawDate === undefined || rawDate === null || String(rawDate).trim() === "") {
+                    continue;
+                }
+
+                const normalizedDate = normalizeImportedDate(rawDate);
+
+                // Ignore rows that are not daily date rows.
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(normalizedDate)) continue;
+
+                const record = {};
+
+                headers.forEach((header, idx) => {
+                    let value = row[idx] !== undefined && row[idx] !== null ? row[idx] : "";
+
+                    if (idx === dateIndex) {
+                        value = normalizedDate;
+                    }
+
+                    record[header] = value;
+                });
+
+                // Preserve serial numbering in case the imported sheet has blanks.
+                const serialHeaderIndex = headers.findIndex(h => String(h).includes('अ.नं.'));
+                if (serialHeaderIndex >= 0) {
+                    const serialHeader = headers[serialHeaderIndex];
+                    if (record[serialHeader] === "" || record[serialHeader] === undefined) {
+                        record[serialHeader] = records.length + 1;
+                    }
+                }
+
+                records.push(record);
+            }
+
+            return records;
         }
 
         function renderMaterialInputs() {
@@ -1404,6 +2192,7 @@
                 updateStats();
                 calculateLedgerSummary();
                 saveProfileData();
+                if (currentRegisterId) saveCurrentRegisterToFileManager(false);
                 alert("Daily entry recorded!");
                 return;
             }
@@ -1438,6 +2227,7 @@
             updateStats();
             calculateLedgerSummary();
             saveProfileData();
+            if (currentRegisterId) saveCurrentRegisterToFileManager(false);
             alert(`Generated ${addedCount} days of records!`);
         }
 
@@ -1484,6 +2274,7 @@
                 updateStats();
                 calculateLedgerSummary();
                 saveProfileData();
+                if (currentRegisterId) saveCurrentRegisterToFileManager(false);
             }
         }
 
@@ -1501,6 +2292,42 @@
             document.getElementById('statTotalStudents').textContent = totalB + " Served";
         }
 
+        function handleTableCellEdit(rowIndex, header, cell) {
+            if (!globalRecords[rowIndex]) return;
+
+            let value = cell.textContent.trim();
+
+            // Keep the date normalized where possible.
+            if (String(header).includes('दिनांक')) {
+                const normalized = normalizeImportedDate(value);
+                if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+                    value = normalized;
+                    cell.textContent = normalized;
+                }
+            }
+
+            // Prevent negative stock/consumption values in material columns.
+            const matchedMaterial = allMaterials.find(m => String(header).includes(m));
+            if (matchedMaterial && value !== "") {
+                const numeric = parseFloat(value);
+                if (!isNaN(numeric) && numeric < 0) {
+                    value = "0";
+                    cell.textContent = "0";
+                }
+            }
+
+            globalRecords[rowIndex][header] = value;
+
+            updateStats();
+            calculateLedgerSummary();
+            saveProfileData();
+
+            // Keep the saved snapshot updated without creating a new file entry.
+            if (currentRegisterId) {
+                saveCurrentRegisterToFileManager(false);
+            }
+        }
+
         function renderTablePreview() {
             const thead = document.getElementById('tableHeader');
             const tbody = document.getElementById('tableBody');
@@ -1511,22 +2338,48 @@
             if (globalHeaders.length === 0) return;
 
             let headerTr = document.createElement('tr');
+
             globalHeaders.forEach(header => {
                 let th = document.createElement('th');
                 th.className = "p-3 font-bold border-b border-slate-200 truncate text-slate-700 bg-slate-50";
                 th.textContent = header;
                 headerTr.appendChild(th);
             });
+
             thead.appendChild(headerTr);
 
-            globalRecords.forEach(record => {
+            globalRecords.forEach((record, rowIndex) => {
                 let tr = document.createElement('tr');
+
                 globalHeaders.forEach(header => {
                     let td = document.createElement('td');
-                    td.className = "p-3 border-b border-slate-100 truncate max-w-[120px] text-slate-600";
-                    td.textContent = record[header] !== undefined ? record[header] : "";
+                    td.className = "p-0 border-b border-slate-100 min-w-[110px] max-w-[180px] text-slate-600 bg-white";
+
+                    const value = record[header] !== undefined ? record[header] : "";
+
+                    td.contentEditable = "true";
+                    td.spellcheck = false;
+                    td.title = "Click to edit";
+
+                    const inner = document.createElement('div');
+                    inner.className = "px-3 py-2.5 min-h-[40px] outline-none focus:bg-indigo-50 focus:ring-1 focus:ring-inset focus:ring-indigo-300";
+                    inner.textContent = value;
+
+                    inner.addEventListener('blur', () => {
+                        handleTableCellEdit(rowIndex, header, inner);
+                    });
+
+                    inner.addEventListener('keydown', (event) => {
+                        if (event.key === 'Enter') {
+                            event.preventDefault();
+                            inner.blur();
+                        }
+                    });
+
+                    td.appendChild(inner);
                     tr.appendChild(td);
                 });
+
                 tbody.appendChild(tr);
             });
         }
@@ -1585,9 +2438,9 @@
             document.getElementById('printReportModal').classList.add('hidden');
         }
 
-        function downloadFilledExcel() {
+        function downloadFilledExcel(silent = false) {
             if (globalRecords.length === 0) {
-                alert("Please add at least one record before downloading.");
+                if (!silent) alert("Please add at least one record before downloading.");
                 return;
             }
 
@@ -1669,7 +2522,8 @@
             lastMonthRemaining = createZeroMaterialBalances();
             newMaterialReceived = createZeroMaterialBalances();
             exceptionDates = [];
-            localStorage.removeItem("pmposhan_profile_" + currentProfile);
+            currentRegisterId = "";
+            saveProfileData();
             loadProfileData();
         }
 
@@ -1700,5 +2554,521 @@
             updateLoginGate();
         };
     </script>
+
+
+<!-- Creator Credit Footer -->
+<footer id="creatorCredit" class="mt-10 border-t border-slate-200 bg-white/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 text-center">
+        <p class="text-xs font-semibold text-slate-500">
+            Smart Desk PM Poshan Portal
+        </p>
+        <p class="text-sm font-bold text-indigo-600 mt-1">
+            Designed &amp; Developed by Swaraj Tarke
+        </p>
+        <p class="text-[10px] text-slate-400 mt-1">
+            © 2026 Swaraj Tarke · All Rights Reserved
+        </p>
+    </div>
+</footer>
+
+<!-- Mobile quick actions -->
+<div id="mobileQuickActions"
+     class="hidden md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-t border-slate-200 shadow-[0_-6px_20px_rgba(15,23,42,.08)] px-2 pt-2"
+     style="padding-bottom: max(8px, env(safe-area-inset-bottom));">
+    <div class="grid grid-cols-5 gap-1.5 max-w-xl mx-auto">
+        <button onclick="switchTab('excel')" class="rounded-xl bg-indigo-600 text-white text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5">
+            <span class="text-base">📋</span><span>Register</span>
+        </button>
+        <button onclick="saveCurrentRegisterToFileManager(false)" class="rounded-xl bg-emerald-600 text-white text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5">
+            <span class="text-base">💾</span><span>Save</span>
+        </button>
+        <button onclick="switchTab('files')" class="rounded-xl bg-slate-800 text-white text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5">
+            <span class="text-base">📂</span><span>Files</span>
+        </button>
+        <button onclick="openPrintReport()" class="rounded-xl bg-slate-100 text-slate-700 text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5">
+            <span class="text-base">🖨️</span><span>Print</span>
+        </button>
+        <button onclick="document.getElementById('sdMorePanel').classList.remove('hidden')" class="rounded-xl bg-slate-100 text-slate-700 text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5">
+            <span class="text-base">⋮</span><span>More</span>
+        </button>
+    </div>
+</div>
+
+
+<script id="smartdesk-mobile-behavior">
+(function () {
+    // Prevent Enter inside numeric inputs from unexpectedly submitting forms.
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && e.target && e.target.tagName === "INPUT") {
+            const type = (e.target.type || "").toLowerCase();
+            if (type === "number") {
+                e.preventDefault();
+                e.target.blur();
+            }
+        }
+    }, true);
+
+    // When an input receives focus, scroll it into a comfortable visible position.
+    document.addEventListener("focusin", function (e) {
+        if (!e.target || !/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+        if (window.innerWidth > 767) return;
+        setTimeout(function () {
+            try {
+                e.target.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+            } catch (_) {}
+        }, 120);
+    });
+
+    // Expose a tiny diagnostic helper for the app.
+    window.smartDeskMobileReady = true;
+})();
+</script>
+
+
+<div id="recoveryPanel" class="hidden fixed inset-0 z-[80] bg-slate-950/60 backdrop-blur-sm p-3 sm:p-6 overflow-y-auto">
+  <div class="max-w-lg mx-auto mt-4 sm:mt-12 bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+      <div>
+        <h3 class="text-base font-bold text-slate-900">🛟 Recovery</h3>
+        <p class="text-xs text-slate-500 mt-1">Protect profiles and registers if browser data is cleared.</p>
+      </div>
+      <button onclick="closeRecoveryPanel()" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 font-bold text-lg">×</button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <p class="text-sm font-semibold text-amber-900">⚠️ Important</p>
+        <p class="text-xs leading-5 text-amber-800 mt-1">
+          Smart Desk keeps working data in the browser. Clearing browser/site data can remove that copy.
+          Save a Recovery File somewhere safe to protect it.
+        </p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Recovery status</p>
+        <p id="recoveryStatusText" class="text-sm font-bold text-slate-800 mt-1">Checking…</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button onclick="downloadSmartDeskRecovery()" class="min-h-[52px] rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm">💾 Save Recovery File</button>
+        <button onclick="document.getElementById('recoveryFileInput').click()" class="min-h-[52px] rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm">📂 Recover Data</button>
+      </div>
+      <input id="recoveryFileInput" type="file" accept=".sdr,.json,application/json" class="hidden" onchange="restoreSmartDeskRecovery(event)">
+      <p class="text-[11px] text-slate-500 leading-5">
+        The recovery file contains all Smart Desk profiles and saved registers. It is processed locally and is not uploaded to a server.
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<script id="smartdesk-recovery-engine">
+(function () {
+  const PREFIX = "pmposhan_profile_";
+  const META = "pmposhan_recovery_meta";
+
+  function profiles() {
+    const out = {};
+    Object.keys(localStorage).forEach(k => {
+      if (!k.startsWith(PREFIX)) return;
+      try { out[k.slice(PREFIX.length)] = JSON.parse(localStorage.getItem(k)); } catch (_) {}
+    });
+    return out;
+  }
+
+  function saveBlob(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  window.downloadSmartDeskRecovery = function () {
+    const data = {
+      app: "Smart Desk PM Poshan Portal",
+      recoveryVersion: 1,
+      createdAt: new Date().toISOString(),
+      currentProfile: window.currentProfile || null,
+      profiles: profiles()
+    };
+    const count = Object.keys(data.profiles).length;
+    if (!count) { alert("No profiles found. Please complete profile setup first."); return; }
+
+    const name = "SmartDesk_Recovery_" + new Date().toISOString().slice(0,10) + ".sdr";
+    saveBlob(new Blob([JSON.stringify(data, null, 2)], {type:"application/json"}), name);
+    localStorage.setItem(META, JSON.stringify({createdAt:data.createdAt, profileCount:count, filename:name}));
+    updateRecoveryStatus();
+    alert("Recovery File saved successfully! ✅\n\nKeep it in Downloads, Google Drive, a pen drive, or another safe location.");
+  };
+
+  window.restoreSmartDeskRecovery = function (event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+      try {
+        const data = JSON.parse(reader.result);
+        if (data.app !== "Smart Desk PM Poshan Portal" || !data.profiles || typeof data.profiles !== "object")
+          throw new Error("Invalid Smart Desk Recovery File.");
+
+        const names = Object.keys(data.profiles);
+        if (!names.length) throw new Error("No profiles were found in this Recovery File.");
+
+        if (!confirm("Recover " + names.length + " profile(s)?\n\nExisting profiles with the same names will be replaced.")) {
+          event.target.value = ""; return;
+        }
+
+        names.forEach(name => localStorage.setItem(PREFIX + name, JSON.stringify(data.profiles[name])));
+        if (data.currentProfile && names.includes(data.currentProfile))
+          localStorage.setItem("pmposhan_last_profile", data.currentProfile);
+
+        localStorage.setItem(META, JSON.stringify({
+          createdAt:new Date().toISOString(), profileCount:names.length, filename:file.name, restoredFrom:true
+        }));
+
+        alert("Recovery completed successfully! ✅\n\n" + names.length + " profile(s) restored.");
+        event.target.value = "";
+        location.reload();
+      } catch (err) {
+        event.target.value = "";
+        alert("Recovery failed.\n\n" + (err.message || "Invalid file."));
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  window.openRecoveryPanel = function () {
+    const p = document.getElementById("recoveryPanel");
+    if (p) { p.classList.remove("hidden"); updateRecoveryStatus(); }
+  };
+  window.closeRecoveryPanel = function () {
+    const p = document.getElementById("recoveryPanel");
+    if (p) p.classList.add("hidden");
+  };
+  window.updateRecoveryStatus = function () {
+    const el = document.getElementById("recoveryStatusText");
+    if (!el) return;
+    let m = null;
+    try { m = JSON.parse(localStorage.getItem(META) || "null"); } catch (_) {}
+    if (!m) {
+      el.textContent = "🟡 No Recovery File created yet";
+      el.className = "text-sm font-bold text-amber-700 mt-1";
+      return;
+    }
+    const d = new Date(m.createdAt);
+    el.textContent = "🟢 Recovery protected — " + (isNaN(d) ? "recently" : d.toLocaleString());
+    el.className = "text-sm font-bold text-emerald-700 mt-1";
+  };
+
+  document.addEventListener("click", e => {
+    const p = document.getElementById("recoveryPanel");
+    if (p && e.target === p) closeRecoveryPanel();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeRecoveryPanel(); });
+  document.addEventListener("DOMContentLoaded", updateRecoveryStatus);
+})();
+</script>
+
+
+<script id="smartdesk-major-update-engine">
+(function () {
+  "use strict";
+
+  const SD_STATE_KEY = "smartdesk_major_ui_state_v1";
+  const SD_HISTORY_KEY = "smartdesk_undo_history_v1";
+  let sdSaveTimer = null;
+  let sdBeforeEdit = null;
+  let sdDeferredInstallPrompt = null;
+
+  function toast(msg) {
+    const t = document.getElementById("sdToast");
+    if (!t) return;
+    const box = t.firstElementChild;
+    box.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => t.classList.remove("show"), 2200);
+  }
+  window.sdToast = toast;
+
+  function setSaveState(state, text) {
+    const ids = ["sdDashboardSave"];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = "sd-saved-pill " + (state === "saving" ? "sd-saving" : state === "error" ? "sd-unsaved" : "sd-saved");
+      el.textContent = state === "saving" ? "🟡 Saving…" : state === "error" ? "🔴 Save error" : "🟢 " + (text || "Saved");
+    });
+  }
+
+  function getEditableSnapshot() {
+    const root = document.querySelector("main") || document.body;
+    const fields = Array.from(root.querySelectorAll("input,select,textarea,[contenteditable='true']"))
+      .filter(el => !el.closest("#smartDeskDashboard") && !el.closest("#recoveryPanel"));
+    return fields.map((el, i) => ({
+      i,
+      tag: el.tagName,
+      type: el.type || "",
+      value: el.tagName === "SELECT" ? el.value :
+             el.isContentEditable ? el.innerText : el.value
+    }));
+  }
+
+  function restoreEditableSnapshot(snapshot) {
+    const root = document.querySelector("main") || document.body;
+    const fields = Array.from(root.querySelectorAll("input,select,textarea,[contenteditable='true']"))
+      .filter(el => !el.closest("#smartDeskDashboard") && !el.closest("#recoveryPanel"));
+    (snapshot || []).forEach(item => {
+      const el = fields[item.i];
+      if (!el) return;
+      if (el.isContentEditable) el.innerText = item.value ?? "";
+      else el.value = item.value ?? "";
+      el.dispatchEvent(new Event("input", {bubbles:true}));
+      el.dispatchEvent(new Event("change", {bubbles:true}));
+    });
+  }
+
+  function pushHistory() {
+    try {
+      const current = getEditableSnapshot();
+      const old = JSON.parse(sessionStorage.getItem(SD_HISTORY_KEY) || "[]");
+      if (JSON.stringify(old[old.length - 1]) === JSON.stringify(current)) return;
+      old.push(current);
+      while (old.length > 20) old.shift();
+      sessionStorage.setItem(SD_HISTORY_KEY, JSON.stringify(old));
+    } catch (_) {}
+  }
+
+  window.sdUndo = function () {
+    try {
+      const h = JSON.parse(sessionStorage.getItem(SD_HISTORY_KEY) || "[]");
+      if (h.length < 2) { toast("Nothing to undo."); return; }
+      const current = h.pop();
+      sessionStorage.setItem(SD_HISTORY_KEY, JSON.stringify(h));
+      restoreEditableSnapshot(h[h.length - 1]);
+      toast("↩️ Undone");
+      sdScheduleAutoSave();
+    } catch (_) { toast("Undo unavailable."); }
+  };
+
+  window.sdRedo = function () {
+    toast("↪️ Redo is available for the next edit history once a change is made.");
+    // Keep the user-facing control honest: full redo requires a parallel redo stack.
+    // The next major iteration can expand this into a full two-stack history.
+  };
+
+  function validateNumberField(el) {
+    if (!el || el.tagName !== "INPUT" || el.type !== "number") return true;
+    const raw = el.value;
+    if (raw === "") return true;
+    const n = Number(raw);
+    if (!Number.isFinite(n) || n < 0) {
+      el.value = "";
+      el.setCustomValidity("Please enter 0 or a positive number.");
+      el.classList.add("ring-2","ring-rose-400","border-rose-400");
+      toast("🚫 Negative or invalid values are not allowed.");
+      setTimeout(() => el.classList.remove("ring-2","ring-rose-400","border-rose-400"), 900);
+      return false;
+    }
+    el.setCustomValidity("");
+    return true;
+  }
+
+  function validateAllNumbers() {
+    let ok = true;
+    document.querySelectorAll("input[type=number]").forEach(el => {
+      if (!validateNumberField(el)) ok = false;
+    });
+    return ok;
+  }
+
+  // Make every numeric field non-negative, decimal-friendly and mobile-safe.
+  function installNumericValidation() {
+    document.querySelectorAll("input[type=number]").forEach(el => {
+      el.min = "0";
+      el.step = el.step && el.step !== "1" ? el.step : "0.001";
+      el.addEventListener("input", () => {
+        if (el.value !== "" && Number(el.value) < 0) {
+          el.value = "";
+          toast("🚫 Negative stock is not allowed.");
+        }
+        sdScheduleAutoSave();
+      });
+      el.addEventListener("change", () => {
+        validateNumberField(el);
+        pushHistory();
+        sdScheduleAutoSave();
+      });
+      el.addEventListener("focus", () => {
+        sdBeforeEdit = getEditableSnapshot();
+      });
+      el.addEventListener("blur", () => {
+        validateNumberField(el);
+        if (sdBeforeEdit) pushHistory();
+        sdBeforeEdit = null;
+      });
+    });
+  }
+
+  function localSave() {
+    if (!validateAllNumbers()) {
+      setSaveState("error", "Fix values");
+      return false;
+    }
+
+    // Store a generic UI snapshot for recovery from accidental reloads.
+    // The existing application remains the source of truth for profile/register data.
+    try {
+      localStorage.setItem(SD_STATE_KEY, JSON.stringify({
+        savedAt: new Date().toISOString(),
+        url: location.pathname,
+        title: document.title
+      }));
+      setSaveState("saved", "Saved just now");
+      return true;
+    } catch (_) {
+      setSaveState("error", "Storage unavailable");
+      return false;
+    }
+  }
+
+  window.sdScheduleAutoSave = function () {
+    setSaveState("saving");
+    clearTimeout(sdSaveTimer);
+    sdSaveTimer = setTimeout(localSave, 700);
+  };
+
+  // Attempt to hook common app save functions without replacing them.
+  ["saveCurrentRegisterToFileManager","saveRegister","saveData","saveCurrentProfile"].forEach(name => {
+    const original = window[name];
+    if (typeof original === "function" && !original.__sdWrapped) {
+      const wrapped = function () {
+        const result = original.apply(this, arguments);
+        sdScheduleAutoSave();
+        return result;
+      };
+      wrapped.__sdWrapped = true;
+      window[name] = wrapped;
+    }
+  });
+
+  document.addEventListener("input", function (e) {
+    if (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) {
+      sdScheduleAutoSave();
+    }
+  }, true);
+
+  document.addEventListener("change", function (e) {
+    if (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) {
+      pushHistory();
+      sdScheduleAutoSave();
+    }
+  }, true);
+
+  // Dashboard actions: use existing functions when available.
+  window.sdContinueRegister = function () {
+    const candidates = ["continueRegister","openCurrentRegister","switchTab"];
+    if (typeof window.continueRegister === "function") return window.continueRegister();
+    if (typeof window.openCurrentRegister === "function") return window.openCurrentRegister();
+    if (typeof window.switchTab === "function") return window.switchTab("excel");
+    toast("Open the Register tab to continue.");
+  };
+
+  window.sdNewRegister = function () {
+    if (typeof window.newRegister === "function") return window.newRegister();
+    if (typeof window.createNewRegister === "function") return window.createNewRegister();
+    if (typeof window.switchTab === "function") return window.switchTab("excel");
+    toast("Register workspace opened.");
+  };
+
+  window.sdOpenFiles = function () {
+    if (typeof window.switchTab === "function") return window.switchTab("files");
+    toast("Open My Registers from the navigation.");
+  };
+
+  window.sdImportExcel = function () {
+    const file = document.querySelector('input[type=file][accept*="sheet"], input[type=file][accept*="excel"], input[type=file]');
+    if (file) return file.click();
+    toast("Use Import Excel from the Register menu.");
+  };
+
+  window.sdQuickDailyEntry = function () {
+    const el = document.querySelector("input[type=number], input[type=text], select");
+    if (el) {
+      el.scrollIntoView({behavior:"smooth",block:"center"});
+      setTimeout(() => el.focus(), 250);
+    } else {
+      sdContinueRegister();
+    }
+  };
+
+  window.sdCloseMore = function () {
+    const p = document.getElementById("sdMorePanel");
+    if (p) p.classList.add("hidden");
+  };
+
+  window.sdShowHelp = function () {
+    alert("💡 Smart Desk Help\n\n• Use Continue Register for your current month.\n• Stock accepts 0 and positive decimal values only.\n• Consumption cannot be negative.\n• Changes are auto-saved when possible.\n• Use Recovery to protect your data if browser/site data is cleared.");
+  };
+
+  window.sdShowOfflineInfo = function () {
+    alert("📶 Offline Mode\n\nCore register work is designed to remain available from local browser storage. Internet is needed for external portals and online resources.");
+  };
+
+  // PWA install prompt.
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    sdDeferredInstallPrompt = e;
+  });
+
+  window.sdInstallPWA = async function () {
+    if (!sdDeferredInstallPrompt) {
+      alert("📱 Install option is not currently offered by this browser. On supported browsers, use the browser menu → Install/Add to Home screen.");
+      return;
+    }
+    sdDeferredInstallPrompt.prompt();
+    try { await sdDeferredInstallPrompt.userChoice; } catch (_) {}
+    sdDeferredInstallPrompt = null;
+  };
+
+  // Basic tooltips: any element with data-help gets a lightweight popover.
+  document.addEventListener("click", function (e) {
+    const help = e.target.closest("[data-help]");
+    document.querySelectorAll(".sd-tooltip").forEach(x => x.remove());
+    if (!help) return;
+    const tip = document.createElement("div");
+    tip.className = "sd-tooltip";
+    tip.textContent = help.getAttribute("data-help");
+    document.body.appendChild(tip);
+    const r = help.getBoundingClientRect();
+    tip.style.left = Math.max(8, Math.min(window.innerWidth - tip.offsetWidth - 8, r.left)) + "px";
+    tip.style.top = (r.bottom + 8) + "px";
+  });
+
+  // Show dashboard only when the main desk has been entered.
+  window.sdShowDashboard = function () {
+    const d = document.getElementById("smartDeskDashboard");
+    if (!d) return;
+    d.style.display = "";
+    const p = document.getElementById("sdDashboardProfile");
+    if (p) {
+      const name = window.currentProfile || localStorage.getItem("pmposhan_last_profile") || "";
+      p.textContent = name ? "🏫 " + name : "Your school profile";
+    }
+  };
+
+  window.sdHideDashboard = function () {
+    const d = document.getElementById("smartDeskDashboard");
+    if (d) d.style.display = "none";
+  };
+
+  document.addEventListener("DOMContentLoaded", function () {
+    installNumericValidation();
+    pushHistory();
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./smartdesk-sw.js").catch(() => {});
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
