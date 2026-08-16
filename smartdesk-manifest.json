@@ -1,0 +1,10 @@
+{
+  "name": "Smart Desk PM Poshan Portal",
+  "short_name": "Smart Desk",
+  "start_url": "./Smart_Desk_PM_Poshan_Major_Update.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "description": "Smart PM Poshan register and school administration tool.",
+  "icons": []
+}
